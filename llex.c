@@ -429,6 +429,14 @@ static int llex (LexState *ls, SemInfo *seminfo) {
           next(ls);  /* skip until end of line (or end of file) */
         break;
       }
+      case '/': {  /* '/' or '//' (short comment) */
+        next(ls);
+        if (ls->current != '/') return '/';
+        next(ls);
+        while (!currIsNewline(ls) && ls->current != EOZ)
+          next(ls);  /* skip until end of line (or end of file) */
+        break;
+      }
       case '[': {  /* long string or simply '[' */
         int sep = skip_sep(ls);
         if (sep >= 0) {
