@@ -88,6 +88,11 @@ const char *luaX_token2str (LexState *ls, int token) {
 }
 
 
+void luaX_trackbraces (LexState *ls) {
+  ls->braces = ls->t.token == '(' ? 1 : -1;
+}
+
+
 static const char *txtToken (LexState *ls, int token) {
   switch (token) {
     case TK_NAME:
@@ -169,6 +174,7 @@ void luaX_setinput (lua_State *L, LexState *ls, ZIO *z, TString *source,
   ls->atsol = 1;
   ls->emiteol = 0;
   ls->lastline = 1;
+  ls->braces = -1;
   ls->source = source;
   ls->envn = luaS_new(L, LUA_ENV);  /* create env name */
   luaS_fix(ls->envn);  /* never collect this name */
@@ -527,6 +533,8 @@ static int llex (LexState *ls, SemInfo *seminfo) {
         }
         else {  /* single-char tokens (+ - / ...) */
           int c = ls->current;
+          ls->braces += c == ')' ? -1 :  /* handle brace count for short if */
+                        c == '(' ? ls->braces > 0 ? 1 : -1 : 0;
           next(ls);
           return c;
         }
