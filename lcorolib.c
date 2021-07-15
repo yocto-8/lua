@@ -137,11 +137,11 @@ static int luaB_corunning (lua_State *L) {
 
 
 static const luaL_Reg co_funcs[] = {
-  {"create", luaB_cocreate},
-  {"resume", luaB_coresume},
-  {"running", luaB_corunning},
-  {"status", luaB_costatus},
-  {"wrap", luaB_cowrap},
+  {"cocreate", luaB_cocreate},
+  {"coresume", luaB_coresume},
+  //{"running", luaB_corunning},
+  {"costatus", luaB_costatus},
+  //{"wrap", luaB_cowrap},
   {"yield", luaB_yield},
   {NULL, NULL}
 };
