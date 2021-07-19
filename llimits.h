@@ -277,14 +277,14 @@ union luai_Cast { double l_d; LUA_INT32 l_p[2]; };
 
 
 #if defined(ltable_c) && !defined(luai_hashnum)
-
+/*
 #include <float.h>
 #include <math.h>
-
 #define luai_hashnum(i,n) { int e;  \
   n = l_mathop(frexp)(n, &e) * (lua_Number)(INT_MAX - DBL_MAX_EXP);  \
   lua_number2int(i, n); i += e; }
-
+*/
+#define luai_hashnum(i,n) { i=n.value; }
 #endif
 
 

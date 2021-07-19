@@ -383,14 +383,16 @@
 ** ===================================================================
 */
 
-#define LUA_NUMBER_DOUBLE
-#define LUA_NUMBER	double
+#include "fix16number.hpp"
+
+//#define LUA_NUMBER_DOUBLE
+#define LUA_NUMBER	LuaFix16
 
 /*
 @@ LUAI_UACNUMBER is the result of an 'usual argument conversion'
 @* over a number.
 */
-#define LUAI_UACNUMBER	double
+#define LUAI_UACNUMBER  LuaFix16
 
 
 /*
@@ -439,15 +441,15 @@
 
 /* these are quite standard operations */
 #if defined(LUA_CORE)
-#define luai_numadd(L,a,b)	((a)+(b))
-#define luai_numsub(L,a,b)	((a)-(b))
-#define luai_nummul(L,a,b)	((a)*(b))
-#define luai_numdiv(L,a,b)	((a)/(b))
-#define luai_numunm(L,a)	(-(a))
-#define luai_numeq(a,b)		((a)==(b))
-#define luai_numlt(L,a,b)	((a)<(b))
-#define luai_numle(L,a,b)	((a)<=(b))
-#define luai_numisnan(L,a)	(!luai_numeq((a), (a)))
+#define luai_numadd(L,a,b)	((lua_Number)(a)+(lua_Number)(b))
+#define luai_numsub(L,a,b)	((lua_Number)(a)-(lua_Number)(b))
+#define luai_nummul(L,a,b)	((lua_Number)(a)*(lua_Number)(b))
+#define luai_numdiv(L,a,b)	((lua_Number)(a)/(lua_Number)(b))
+#define luai_numunm(L,a)	(-(lua_Number)(a))
+#define luai_numeq(a,b)		((lua_Number)(a)==(lua_Number)(b))
+#define luai_numlt(L,a,b)	((lua_Number)(a)<(lua_Number)(b))
+#define luai_numle(L,a,b)	((lua_Number)(a)<=(lua_Number)(b))
+#define luai_numisnan(L,a)	(!luai_numeq((lua_Number)(a), (lua_Number)(a)))
 #endif
 
 

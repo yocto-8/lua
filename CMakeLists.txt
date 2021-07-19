@@ -1,4 +1,4 @@
-add_library(picolua
+set(LUA_SOURCES
     lapi.c
     lauxlib.c
     lbaselib.c
@@ -15,7 +15,7 @@ add_library(picolua
     linit.c
     liolib.c
     llex.c
-    lmathlib.c
+    #lmathlib.c
     lmem.c
     loadlib.c
     lobject.c
@@ -32,4 +32,18 @@ add_library(picolua
     lundump.c
     lvm.c
     lzio.c
+
+    ../libfixmath/libfixmath/fix16_exp.c
+    ../libfixmath/libfixmath/fix16_sqrt.c
+    ../libfixmath/libfixmath/fix16_str.c
+    ../libfixmath/libfixmath/fix16_trig.c
+    ../libfixmath/libfixmath/fix16.c
+    ../libfixmath/libfixmath/compat/strconv.c
 )
+
+SET_SOURCE_FILES_PROPERTIES(${LUA_SOURCES} PROPERTIES LANGUAGE CXX)
+
+add_library(picolua ${LUA_SOURCES})
+target_include_directories(picolua PUBLIC "../libfixmath/libfixmath")
+
+target_compile_options(picolua PRIVATE "-flto")

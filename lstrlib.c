@@ -918,7 +918,7 @@ static int str_format (lua_State *L) {
           lua_Number n = luaL_checknumber(L, arg);
           LUA_INTFRM_T ni = (LUA_INTFRM_T)n;
           lua_Number diff = n - (lua_Number)ni;
-          luaL_argcheck(L, -1 < diff && diff < 1, arg,
+          luaL_argcheck(L, (lua_Number)-1 < diff && diff < (lua_Number)1, arg,
                         "not a number in proper range");
           addlenmod(form, LUA_INTFRMLEN);
           nb = sprintf(buff, form, ni);
@@ -928,7 +928,7 @@ static int str_format (lua_State *L) {
           lua_Number n = luaL_checknumber(L, arg);
           unsigned LUA_INTFRM_T ni = (unsigned LUA_INTFRM_T)n;
           lua_Number diff = n - (lua_Number)ni;
-          luaL_argcheck(L, -1 < diff && diff < 1, arg,
+          luaL_argcheck(L, (lua_Number)-1 < diff && diff < (lua_Number)1, arg,
                         "not a non-negative number in proper range");
           addlenmod(form, LUA_INTFRMLEN);
           nb = sprintf(buff, form, ni);

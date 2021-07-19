@@ -170,7 +170,7 @@ static int luaB_collectgarbage (lua_State *L) {
   switch (o) {
     case LUA_GCCOUNT: {
       int b = lua_gc(L, LUA_GCCOUNTB, 0);
-      lua_pushnumber(L, res + ((lua_Number)b/1024));
+      lua_pushnumber(L, (lua_Number)res + ((lua_Number)b/(lua_Number)1024));
       lua_pushinteger(L, b);
       return 2;
     }
