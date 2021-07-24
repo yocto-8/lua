@@ -74,6 +74,8 @@ class LuaFix16 {
 		int operator< (const LuaFix16 &other)  const { return (value <  other.value);             }
 		int operator> (const LuaFix16 &other)  const { return (value >  other.value);             }
 
+		// FIXME: method vs public function should be normalized into one thing
+
 		LuaFix16  sin() const { return LuaFix16::from_fix16(fix16_sin(value));  }
 		LuaFix16  cos() const { return LuaFix16::from_fix16(fix16_cos(value));  }
 		LuaFix16  tan() const { return LuaFix16::from_fix16(fix16_tan(value));  }

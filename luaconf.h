@@ -402,8 +402,8 @@
 @@ LUAI_MAXNUMBER2STR is maximum size of previous conversion.
 */
 #define LUA_NUMBER_SCAN		"%lf"
-#define LUA_NUMBER_FMT		"%.14g"
-#define lua_number2str(s,n)	sprintf((s), LUA_NUMBER_FMT, (n))
+#define LUA_NUMBER_FMT		"%d.%d"
+#define lua_number2str(s,n)	sprintf((s), LUA_NUMBER_FMT, (n).value >> 16, (n).value & 0xFFFF)
 #define LUAI_MAXNUMBER2STR	32 /* 16 digits, sign, point, and \0 */
 
 

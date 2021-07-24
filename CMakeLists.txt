@@ -38,7 +38,6 @@ set(LUA_SOURCES
     ../libfixmath/libfixmath/fix16_str.c
     ../libfixmath/libfixmath/fix16_trig.c
     ../libfixmath/libfixmath/fix16.c
-    ../libfixmath/libfixmath/compat/strconv.c
 )
 
 SET_SOURCE_FILES_PROPERTIES(${LUA_SOURCES} PROPERTIES LANGUAGE CXX)
