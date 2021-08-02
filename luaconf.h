@@ -18,6 +18,7 @@
 ** ===================================================================
 */
 
+#define LUA_USE_LONGJMP
 
 /*
 @@ LUA_ANSI controls the use of non-ansi features.
@@ -402,9 +403,10 @@
 @@ LUAI_MAXNUMBER2STR is maximum size of previous conversion.
 */
 #define LUA_NUMBER_SCAN		"%lf"
-#define LUA_NUMBER_FMT		"%d.%d"
-#define lua_number2str(s,n)	sprintf((s), LUA_NUMBER_FMT, (n).value >> 16, (n).value & 0xFFFF)
-#define LUAI_MAXNUMBER2STR	32 /* 16 digits, sign, point, and \0 */
+#define LUA_NUMBER_FMT		"%d" // used in liolib, which will be broken, but we dn't use it so lol
+//#define lua_number2str(s,n)	sprintf((s), LUA_NUMBER_FMT, (n).value >> 16, (n).value & 0xFFFF)
+#define lua_number2str(s,n)	fix16_to_str((n).value, s, 4)
+#define LUAI_MAXNUMBER2STR	13
 
 
 /*
