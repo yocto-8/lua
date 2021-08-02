@@ -44,4 +44,5 @@ SET_SOURCE_FILES_PROPERTIES(${LUA_SOURCES} PROPERTIES LANGUAGE CXX)
 
 add_library(picolua ${LUA_SOURCES})
 target_include_directories(picolua PUBLIC "../libfixmath/libfixmath")
+target_compile_definitions(picolua PUBLIC "LUA_USE_LONGJMP")
 set_property(TARGET picolua PROPERTY INTERPROCEDURAL_OPTIMIZATION ON)
