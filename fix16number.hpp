@@ -22,7 +22,7 @@ class LuaFix16 {
             return v;
         }
 
-		explicit operator fix16_t() const { return value;                 }
+		//explicit operator fix16_t() const { return value;                 }
 		explicit operator double()  const { return fix16_to_dbl(value);   }
 		explicit operator float()   const { return fix16_to_float(value); }
         
