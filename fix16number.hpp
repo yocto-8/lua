@@ -1,5 +1,6 @@
 #include <fix16.h>
 
+#include <compare>
 #include <type_traits>
 
 // adapted from fix16.hpp
@@ -7,11 +8,12 @@ class LuaFix16 {
 	public:
 		fix16_t value;
 
-		LuaFix16() = default; // this _should_ initialize value to 0? POD stuff?
-		LuaFix16(const LuaFix16 &inValue) = default;
+		constexpr LuaFix16() = default;
+		constexpr LuaFix16(const LuaFix16 &inValue) = default;
 		//LuaFix16(const fix16_t inValue) { value = inValue;                   }
 		LuaFix16(const float inValue)   { value = fix16_from_float(inValue); }
 		LuaFix16(const double inValue)  { value = fix16_from_dbl(inValue);   }
+		LuaFix16(const int inValue)     { value = fix16_from_int(inValue);   }
         
         template <typename Integer, std::enable_if_t<std::is_integral<Integer>::value, bool> = true>
         LuaFix16(const Integer inValue) { value = fix16_from_int(inValue);   }
@@ -67,12 +69,7 @@ class LuaFix16 {
 		const LuaFix16 sdiv(const LuaFix16 &other)  const { LuaFix16 ret = LuaFix16::from_fix16(fix16_sdiv(value, other.value));             return ret; }
 #endif
 
-		int operator==(const LuaFix16 &other)  const { return (value == other.value);             }
-		int operator!=(const LuaFix16 &other)  const { return (value != other.value);             }
-		int operator<=(const LuaFix16 &other)  const { return (value <= other.value);             }
-		int operator>=(const LuaFix16 &other)  const { return (value >= other.value);             }
-		int operator< (const LuaFix16 &other)  const { return (value <  other.value);             }
-		int operator> (const LuaFix16 &other)  const { return (value >  other.value);             }
+		auto operator<=>(const LuaFix16& other) const = default;
 
 		// FIXME: method vs public function should be normalized into one thing
 
