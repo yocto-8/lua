@@ -526,10 +526,19 @@ void luaV_finishOp (lua_State *L) {
         } \
         else { Protect(luaV_arith(L, ra, rb, rc, tm)); } }
 
+#define vmdispatch() \
+        i = *(ci->u.l.savedpc++); \
+        ra = RA(i); \
+        lua_assert(base == ci->u.l.base); \
+        lua_assert(base <= L->top && L->top < L->stack + L->stacksize); \
+        goto *opcode_table[GET_OPCODE(i)];
 
-#define vmdispatch(o)	switch(o)
-#define vmcase(l,b)	case l: {b}  break;
-#define vmcasenb(l,b)	case l: {b}		/* nb = no break */
+#define vmcase(l,b)	l: {b}  vmdispatch();
+#define vmcasenb(l,b)	l: {b}		/* nb = no break */
+
+//#undef lua_assert
+//#define lua_assert(c) ((c) ? 0 : (__builtin_unreachable(), 0))
+//#define lua_assert(c) (([&]() __attribute__((flatten, always_inline)) { return (c); })() ? 0 : (__builtin_unreachable(), 0))
 
 void luaV_execute (lua_State *L) {
   CallInfo *ci = L->ci;
@@ -543,17 +552,75 @@ void luaV_execute (lua_State *L) {
   base = ci->u.l.base;
   /* main loop of interpreter */
   for (;;) {
-    Instruction i = *(ci->u.l.savedpc++);
+    Instruction i; 
     StkId ra;
-    if ((L->hookmask & (LUA_MASKLINE | LUA_MASKCOUNT)) &&
+    /*if ((L->hookmask & (LUA_MASKLINE | LUA_MASKCOUNT)) &&
         (--L->hookcount == 0 || L->hookmask & LUA_MASKLINE)) {
       Protect(traceexec(L));
-    }
+    }*/
+
     /* WARNING: several calls may realloc the stack and invalidate `ra' */
-    ra = RA(i);
-    lua_assert(base == ci->u.l.base);
-    lua_assert(base <= L->top && L->top < L->stack + L->stacksize);
-    vmdispatch (GET_OPCODE(i)) {
+
+    constexpr void *const opcode_table[] = {
+      &&OP_MOVE,
+      &&OP_LOADK,
+      &&OP_LOADKX,
+      &&OP_LOADBOOL,
+      &&OP_LOADNIL,
+      &&OP_GETUPVAL,
+
+      &&OP_GETTABUP,
+      &&OP_GETTABLE,
+
+      &&OP_SETTABUP,
+      &&OP_SETUPVAL,
+      &&OP_SETTABLE,
+
+      &&OP_NEWTABLE,
+
+      &&OP_SELF,
+
+      &&OP_ADD,/*	A B C	R(A) := RK(B) + RK(C)				*/
+      &&OP_SUB,/*	A B C	R(A) := RK(B) - RK(C)				*/
+      &&OP_MUL,/*	A B C	R(A) := RK(B) * RK(C)				*/
+      &&OP_DIV,/*	A B C	R(A) := RK(B) / RK(C)				*/
+      &&OP_MOD,/*	A B C	R(A) := RK(B) % RK(C)				*/
+      &&OP_POW,/*	A B C	R(A) := RK(B) ^ RK(C)				*/
+      &&OP_UNM,/*	A B	R(A) := -R(B)					*/
+      &&OP_NOT,/*	A B	R(A) := not R(B)				*/
+      &&OP_LEN,/*	A B	R(A) := length of R(B)				*/
+
+      &&OP_CONCAT,/*	A B C	R(A) := R(B).. ... ..R(C)			*/
+
+      &&OP_JMP,/*	A sBx	pc+=sBx; if (A) close all upvalues >= R(A - 1)	*/
+      &&OP_EQ,/*	A B C	if ((RK(B) == RK(C)) ~= A) then pc++		*/
+      &&OP_LT,/*	A B C	if ((RK(B) <  RK(C)) ~= A) then pc++		*/
+      &&OP_LE,/*	A B C	if ((RK(B) <= RK(C)) ~= A) then pc++		*/
+
+      &&OP_TEST,/*	A C	if not (R(A) <=> C) then pc++			*/
+      &&OP_TESTSET,/*	A B C	if (R(B) <=> C) then R(A) := R(B) else pc++	*/
+
+      &&OP_CALL,/*	A B C	R(A), ... ,R(A+C-2) := R(A)(R(A+1), ... ,R(A+B-1)) */
+      &&OP_TAILCALL,/*	A B C	return R(A)(R(A+1), ... ,R(A+B-1))		*/
+      &&OP_RETURN,/*	A B	return R(A), ... ,R(A+B-2)	(see note)	*/
+
+      &&OP_FORLOOP,/*	A sBx	R(A)+=R(A+2);
+            if R(A) <?= R(A+1) then { pc+=sBx; R(A+3)=R(A) }*/
+      &&OP_FORPREP,/*	A sBx	R(A)-=R(A+2); pc+=sBx				*/
+
+      &&OP_TFORCALL,/*	A C	R(A+3), ... ,R(A+2+C) := R(A)(R(A+1), R(A+2));	*/
+      &&OP_TFORLOOP,/*	A sBx	if R(A+1) ~= nil then { R(A)=R(A+1); pc += sBx }*/
+
+      &&OP_SETLIST,
+
+      &&OP_CLOSURE,
+
+      &&OP_VARARG,
+
+      &&OP_EXTRAARG
+    };
+    
+    vmdispatch ()
       vmcase(OP_MOVE,
         setobjs2s(L, ra, RB(i));
       )
@@ -861,7 +928,6 @@ void luaV_execute (lua_State *L) {
       vmcase(OP_EXTRAARG,
         lua_assert(0);
       )
-    }
   }
 }
 
