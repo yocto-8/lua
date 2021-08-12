@@ -48,7 +48,12 @@
 */
 #if !defined(LUAI_THROW)
 
-#if defined(__cplusplus) && !defined(LUA_USE_LONGJMP)
+#if defined(YOCTO8_YOLO_RELEASE)
+#define LUAI_THROW(L,c) __builtin_unreachable()
+#define LUAI_TRY(L,c,a) { a }
+#define luai_jmpbuf		int
+
+#elif defined(__cplusplus) && !defined(LUA_USE_LONGJMP)
 /* C++ exceptions */
 #define LUAI_THROW(L,c)		throw(c)
 #define LUAI_TRY(L,c,a) \
@@ -82,6 +87,9 @@ struct lua_longjmp {
 
 
 static void seterrorobj (lua_State *L, int errcode, StkId oldtop) {
+#ifdef YOCTO8_YOLO_RELEASE
+  __builtin_unreachable();
+#endif
   switch (errcode) {
     case LUA_ERRMEM: {  /* memory error? */
       setsvalue2s(L, oldtop, G(L)->memerrmsg); /* reuse preregistered msg. */
@@ -101,6 +109,9 @@ static void seterrorobj (lua_State *L, int errcode, StkId oldtop) {
 
 
 l_noret luaD_throw (lua_State *L, int errcode) {
+#ifdef YOCTO8_YOLO_RELEASE
+  __builtin_unreachable();
+#endif
   if (L->errorJmp) {  /* thread has an error handler? */
     L->errorJmp->status = errcode;  /* set status */
     LUAI_THROW(L, L->errorJmp);  /* jump to it */

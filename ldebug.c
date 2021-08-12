@@ -528,6 +528,9 @@ static const char *getupvalname (CallInfo *ci, const TValue *o,
 
 
 l_noret luaG_typeerror (lua_State *L, const TValue *o, const char *op) {
+#ifdef YOCTO8_YOLO_RELEASE
+  __builtin_unreachable();
+#endif
   CallInfo *ci = L->ci;
   const char *name = NULL;
   const char *t = objtypename(o);
@@ -547,6 +550,9 @@ l_noret luaG_typeerror (lua_State *L, const TValue *o, const char *op) {
 
 
 l_noret luaG_concaterror (lua_State *L, StkId p1, StkId p2) {
+#ifdef YOCTO8_YOLO_RELEASE
+  __builtin_unreachable();
+#endif
   if (ttisstring(p1) || ttisnumber(p1)) p1 = p2;
   lua_assert(!ttisstring(p1) && !ttisnumber(p1));
   luaG_typeerror(L, p1, "concatenate");
@@ -554,6 +560,9 @@ l_noret luaG_concaterror (lua_State *L, StkId p1, StkId p2) {
 
 
 l_noret luaG_aritherror (lua_State *L, const TValue *p1, const TValue *p2) {
+#ifdef YOCTO8_YOLO_RELEASE
+  __builtin_unreachable();
+#endif
   TValue temp;
   if (luaV_tonumber(p1, &temp) == NULL)
     p2 = p1;  /* first operand is wrong */
@@ -562,6 +571,9 @@ l_noret luaG_aritherror (lua_State *L, const TValue *p1, const TValue *p2) {
 
 
 l_noret luaG_ordererror (lua_State *L, const TValue *p1, const TValue *p2) {
+#ifdef YOCTO8_YOLO_RELEASE
+  __builtin_unreachable();
+#endif
   const char *t1 = objtypename(p1);
   const char *t2 = objtypename(p2);
   if (t1 == t2)
@@ -588,6 +600,9 @@ static void addinfo (lua_State *L, const char *msg) {
 
 
 l_noret luaG_errormsg (lua_State *L) {
+#ifdef YOCTO8_YOLO_RELEASE
+  __builtin_unreachable();
+#endif
   if (L->errfunc != 0) {  /* is there an error handling function? */
     StkId errfunc = restorestack(L, L->errfunc);
     if (!ttisfunction(errfunc)) luaD_throw(L, LUA_ERRERR);
@@ -601,6 +616,9 @@ l_noret luaG_errormsg (lua_State *L) {
 
 
 l_noret luaG_runerror (lua_State *L, const char *fmt, ...) {
+#ifdef YOCTO8_YOLO_RELEASE
+  __builtin_unreachable();
+#endif
   va_list argp;
   va_start(argp, fmt);
   addinfo(L, luaO_pushvfstring(L, fmt, argp));

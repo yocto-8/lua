@@ -194,6 +194,9 @@ LUALIB_API void luaL_where (lua_State *L, int level) {
 
 
 LUALIB_API int luaL_error (lua_State *L, const char *fmt, ...) {
+#ifdef YOCTO8_YOLO_RELEASE
+  __builtin_unreachable();
+#endif
   va_list argp;
   va_start(argp, fmt);
   luaL_where(L, 1);
