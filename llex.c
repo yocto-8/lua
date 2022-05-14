@@ -38,8 +38,8 @@ static const char *const luaX_tokens [] = {
     "end", "false", "for", "function", "goto", "if",
     "in", "local", "nil", "not", "or", "repeat",
     "return", "then", "true", "until", "while",
-    "..", "...", "==", ">=", "<=", "~=", "::", "<eof>",
-    "<number>", "<name>", "<string>"
+    "..", "...", "==", ">=", "<=", "~=", "!=", "::", "<eof>",
+    "<number>", "<name>", "<string>", "?", "<eol>"
 };
 
 
@@ -153,6 +153,7 @@ static void inclinenumber (LexState *ls) {
     next(ls);  /* skip `\n\r' or `\r\n' */
   if (++ls->linenumber >= MAX_INT)
     lexerror(ls, "chunk has too many lines", 0);
+  ls->atsol = 1;
 }
 
 
@@ -165,6 +166,8 @@ void luaX_setinput (lua_State *L, LexState *ls, ZIO *z, TString *source,
   ls->z = z;
   ls->fs = NULL;
   ls->linenumber = 1;
+  ls->atsol = 1;
+  ls->emiteol = 0;
   ls->lastline = 1;
   ls->source = source;
   ls->envn = luaS_new(L, LUA_ENV);  /* create env name */
@@ -401,14 +404,23 @@ static void read_string (LexState *ls, int del, SemInfo *seminfo) {
 static int llex (LexState *ls, SemInfo *seminfo) {
   luaZ_resetbuffer(ls->buff);
   for (;;) {
+    int atsol = ls->atsol;
+    ls->atsol = 0;  /* assume no longer at start of line */
     switch (ls->current) {
       case '\n': case '\r': {  /* line breaks */
         inclinenumber(ls);
+        if (ls->emiteol) { ls->emiteol = 0; return TK_EOL; }
         break;
       }
       case ' ': case '\f': case '\t': case '\v': {  /* spaces */
         next(ls);
+        ls->atsol = atsol;  /* still at sol if we already were. */
         break;
+      }
+      case '?': {  /* '?' at start of line */
+        next(ls);
+        if (atsol == 1) { ls->emiteol = 1; return TK_PRINT; }
+        return '?';
       }
       case '-': {  /* '-' or '--' (comment) */
         next(ls);
