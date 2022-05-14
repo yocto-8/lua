@@ -483,6 +483,7 @@ static const char *getfuncname (lua_State *L, CallInfo *ci, const char **name) {
     case OP_SUB: tm = TM_SUB; break;
     case OP_MUL: tm = TM_MUL; break;
     case OP_DIV: tm = TM_DIV; break;
+    case OP_IDIV: tm = TM_IDIV; break;
     case OP_MOD: tm = TM_MOD; break;
     case OP_POW: tm = TM_POW; break;
     case OP_UNM: tm = TM_UNM; break;

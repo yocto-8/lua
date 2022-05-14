@@ -426,7 +426,7 @@ void luaV_finishOp (lua_State *L) {
   Instruction inst = *(ci->u.l.savedpc - 1);  /* interrupted instruction */
   OpCode op = GET_OPCODE(inst);
   switch (op) {  /* finish its execution */
-    case OP_ADD: case OP_SUB: case OP_MUL: case OP_DIV:
+    case OP_ADD: case OP_SUB: case OP_MUL: case OP_DIV: case OP_IDIV:
     case OP_MOD: case OP_POW: case OP_UNM: case OP_LEN:
     case OP_GETTABUP: case OP_GETTABLE: case OP_SELF: {
       setobjs2s(L, base + GETARG_A(inst), --L->top);
@@ -584,6 +584,7 @@ void luaV_execute (lua_State *L) {
       &&OP_SUB,/*	A B C	R(A) := RK(B) - RK(C)				*/
       &&OP_MUL,/*	A B C	R(A) := RK(B) * RK(C)				*/
       &&OP_DIV,/*	A B C	R(A) := RK(B) / RK(C)				*/
+      &&OP_IDIV,/*	A B C	R(A) := RK(B) \ RK(C)				*/
       &&OP_MOD,/*	A B C	R(A) := RK(B) % RK(C)				*/
       &&OP_POW,/*	A B C	R(A) := RK(B) ^ RK(C)				*/
       &&OP_UNM,/*	A B	R(A) := -R(B)					*/
@@ -692,6 +693,9 @@ void luaV_execute (lua_State *L) {
       )
       vmcase(OP_DIV,
         arith_op(luai_numdiv, TM_DIV);
+      )
+      vmcase(OP_IDIV,
+        arith_op(luai_numidiv, TM_IDIV);
       )
       vmcase(OP_MOD,
         arith_op(luai_nummod, TM_MOD);
