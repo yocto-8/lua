@@ -14,6 +14,9 @@ class LuaFix16 {
 		LuaFix16(const float inValue)   { value = fix16_from_float(inValue); }
 		LuaFix16(const double inValue)  { value = fix16_from_dbl(inValue);   }
 		LuaFix16(const int inValue)     { value = fix16_from_int(inValue);   }
+		LuaFix16(const int16_t integer_part, uint16_t decimal_part) {
+			value = (uint16_t(integer_part) << 16) | decimal_part;
+		}
         
         template <typename Integer, std::enable_if_t<std::is_integral<Integer>::value, bool> = true>
         LuaFix16(const Integer inValue) { value = fix16_from_int(inValue);   }
