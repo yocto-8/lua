@@ -45,6 +45,7 @@ class LuaFix16 {
 		LuaFix16 & operator+=(const LuaFix16 &rhs)  { value += rhs.value;             return *this; }
 		LuaFix16 & operator-=(const LuaFix16 &rhs)  { value -= rhs.value; return *this; }
 		LuaFix16 & operator*=(const LuaFix16 &rhs)  { value = fix16_mul(value, rhs.value); return *this; }
+		LuaFix16 & operator%=(const LuaFix16 &rhs)  { value = fix16_mod(value, rhs.value); return *this; }
 		LuaFix16 & operator/=(const LuaFix16 &rhs)  { value = fix16_div(value, rhs.value); return *this; }
 		const LuaFix16 operator+(const LuaFix16 &other) const  { LuaFix16 ret = *this; ret += other; return ret; }
 
@@ -71,6 +72,8 @@ class LuaFix16 {
 #ifndef FIXMATH_NO_OVERFLOW
 		const LuaFix16 sdiv(const LuaFix16 &other)  const { LuaFix16 ret = LuaFix16::from_fix16(fix16_sdiv(value, other.value));             return ret; }
 #endif
+
+		const LuaFix16 operator%(const LuaFix16 &other) const  { LuaFix16 ret = *this; ret %= other; return ret; }
 
 		auto operator<=>(const LuaFix16& other) const = default;
 
