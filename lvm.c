@@ -540,6 +540,7 @@ void luaV_finishOp (lua_State *L) {
 //#define lua_assert(c) ((c) ? 0 : (__builtin_unreachable(), 0))
 //#define lua_assert(c) (([&]() __attribute__((flatten, always_inline)) { return (c); })() ? 0 : (__builtin_unreachable(), 0))
 
+[[gnu::section(FAST_FUNC_TARGET_SECTION), gnu::flatten, gnu::optimize("Os")]]
 void luaV_execute (lua_State *L) {
   CallInfo *ci = L->ci;
   LClosure *cl;
