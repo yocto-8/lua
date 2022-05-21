@@ -91,7 +91,7 @@ class LuaFix16 {
 		LUAFIX16_FN_ATTR LuaFix16 sqrt() const { return LuaFix16::from_fix16(fix16_sqrt(value)); }
 };
 
-inline LuaFix16 fabs(LuaFix16 x) { return LuaFix16::from_fix16(fix_abs(x.value)); }
+inline LuaFix16 fabs(LuaFix16 x) { return LuaFix16::from_fix16(fix16_abs(x.value)); }
 inline LuaFix16 sin(LuaFix16 x) { return x.sin(); }
 inline LuaFix16 floor(LuaFix16 x) { return LuaFix16::from_fix16(fix16_floor(x.value)); }
 inline LuaFix16 exp(LuaFix16 x) { return LuaFix16::from_fix16(fix16_exp(x.value)); }
