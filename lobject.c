@@ -153,8 +153,10 @@ static lua_Number lua_strx2number (const char *s, char **endptr) {
 #endif
 
 static lua_Number lua_strb2number (const char *s, char **endptr) {
-  lua_Number r = 0.0;
-  int i = 0; int f = 0;
+  /* yocto-8 modified: accept decimal values */
+
+  uint32_t r = 0;
+  int int_digits = 0, decimal_digits = 0;
   *endptr = cast(char *, s);  /* nothing is valid yet */
   while (lisspace(cast_uchar(*s))) s++;  /* skip initial spaces */
   if (!(*s == '0' && (*(s + 1) == 'b' || *(s + 1) == 'B')))  /* check '0b' */
@@ -162,15 +164,27 @@ static lua_Number lua_strb2number (const char *s, char **endptr) {
   s += 2;  /* skip '0b' */
   while ((*s == '0') || (*s == '1'))
   {
-    f = 0;
-    r *= 2.0;
-    if (*s == '1') r += 1.0;
-    i++; s++;
+    r <<= 1;
+    if (*s == '1') r |= 1;
+    int_digits++; s++;
   }
-  if ((i == 0) || (f > 0))
+
+  if (int_digits == 0)
     return 0.0;  /* invalid format */
+
+  r <<= 16;
+  if (*s == '.') { /* decimal part */
+    s += 1; /* skip dot */
+    while ((*s == '0') || (*s == '1'))
+    {
+      if (decimal_digits < 16) {
+        if (*s == '1') r |= 1 << (15 - decimal_digits);
+      }
+      decimal_digits++; s++;
+    }
+  }
   *endptr = cast(char *, s);  /* valid up to here */
-  return r;
+  return lua_Number::from_fix16(int(r));
 }
 
 int luaO_str2d (const char *s, size_t len, lua_Number *result) {
