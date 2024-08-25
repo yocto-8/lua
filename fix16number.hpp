@@ -44,37 +44,17 @@ class LuaFix16 {
         template <typename Integer, std::enable_if_t<std::is_integral<Integer>::value, bool> = true>
         LUAFIX16_FN_ATTR LuaFix16 & operator=(const Integer rhs) { value = fix16_from_int(rhs);   return *this; }
 
-		LUAFIX16_FN_ATTR LuaFix16 & operator+=(const LuaFix16 &rhs)  { value += rhs.value;             return *this; }
-		LUAFIX16_FN_ATTR LuaFix16 & operator-=(const LuaFix16 &rhs)  { value -= rhs.value; return *this; }
+		LUAFIX16_FN_ATTR LuaFix16 & operator+=(const LuaFix16 &rhs)  { value = fix16_add(value, rhs.value); return *this; }
+		LUAFIX16_FN_ATTR LuaFix16 & operator-=(const LuaFix16 &rhs)  { value = fix16_sub(value, rhs.value); return *this; }
 		LUAFIX16_FN_ATTR LuaFix16 & operator*=(const LuaFix16 &rhs)  { value = fix16_mul(value, rhs.value); return *this; }
 		LUAFIX16_FN_ATTR LuaFix16 & operator%=(const LuaFix16 &rhs)  { value = fix16_mod(value, rhs.value); return *this; }
 		LUAFIX16_FN_ATTR LuaFix16 & operator/=(const LuaFix16 &rhs)  { value = fix16_div(value, rhs.value); return *this; }
+
 		LUAFIX16_FN_ATTR const LuaFix16 operator+(const LuaFix16 &other) const  { LuaFix16 ret = *this; ret += other; return ret; }
-
         LUAFIX16_FN_ATTR const LuaFix16 operator-() const { return LuaFix16(0) - *this; }
-
-#ifndef FIXMATH_NO_OVERFLOW
-		LUAFIX16_FN_ATTR const LuaFix16 sadd(const LuaFix16 &other)  const { LuaFix16 ret = LuaFix16::from_fix16(fix16_sadd(value, other.value));             return ret; }
-#endif
-
 		LUAFIX16_FN_ATTR const LuaFix16 operator-(const LuaFix16 &other) const  { LuaFix16 ret = *this; ret -= other; return ret; }
-
-#ifndef FIXMATH_NO_OVERFLOW
-		LUAFIX16_FN_ATTR const LuaFix16 ssub(const LuaFix16 &other)  const { LuaFix16 ret = LuaFix16::from_fix16(fix16_sadd(value, -other.value));             return ret; }
-#endif
-
 		LUAFIX16_FN_ATTR const LuaFix16 operator*(const LuaFix16 &other) const  { LuaFix16 ret = *this; ret *= other; return ret; }
-
-#ifndef FIXMATH_NO_OVERFLOW
-		LUAFIX16_FN_ATTR const LuaFix16 smul(const LuaFix16 &other)  const { LuaFix16 ret = LuaFix16::from_fix16(fix16_smul(value, other.value));             return ret; }
-#endif
-
 		LUAFIX16_FN_ATTR const LuaFix16 operator/(const LuaFix16 &other) const  { LuaFix16 ret = *this; ret /= other; return ret; }
-
-#ifndef FIXMATH_NO_OVERFLOW
-		LUAFIX16_FN_ATTR const LuaFix16 sdiv(const LuaFix16 &other)  const { LuaFix16 ret = LuaFix16::from_fix16(fix16_sdiv(value, other.value));             return ret; }
-#endif
-
 		LUAFIX16_FN_ATTR const LuaFix16 operator%(const LuaFix16 &other) const  { LuaFix16 ret = *this; ret %= other; return ret; }
 
 		LUAFIX16_FN_ATTR auto operator<=>(const LuaFix16& other) const = default;
