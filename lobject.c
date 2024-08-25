@@ -102,9 +102,17 @@ static int isneg (const char **s) {
 }
 
 
-static lua_Number readhexa (const char **s, lua_Number r, int *count) {
+static uint16_t readhexa (const char **s, int *count, bool is_decimal_part) {
+  uint16_t r = 0;
   for (; lisxdigit(cast_uchar(**s)); (*s)++) {  /* read integer part */
-    r = (r * cast_num(16.0)) + cast_num(luaO_hexavalue(cast_uchar(**s)));
+    int digit_value = luaO_hexavalue(cast_uchar(**s));
+    if (is_decimal_part) {
+      if (*count < 4) {
+        r |= uint16_t(digit_value << (12 - (*count) * 4));
+      }
+    } else {
+      r = (r << 4) | digit_value;
+    }
     (*count)++;
   }
   return r;
@@ -116,8 +124,11 @@ static lua_Number readhexa (const char **s, lua_Number r, int *count) {
 ** C99 specification for 'strtod'
 */
 static lua_Number lua_strx2number (const char *s, char **endptr) {
-  lua_Number r = 0.0;
-  int e = 0, i = 0;
+  /* yocto-8 modified: numbers are fixed-point */
+  /* yocto-8 modified: `p` was removed from this parsing */
+  static_assert(std::is_same_v<lua_Number, LuaFix16>);
+
+  int d = 0, i = 0;
   int neg = 0;  /* 1 if number is negative */
   *endptr = cast(char *, s);  /* nothing is valid yet */
   while (lisspace(cast_uchar(*s))) s++;  /* skip initial spaces */
@@ -125,31 +136,18 @@ static lua_Number lua_strx2number (const char *s, char **endptr) {
   if (!(*s == '0' && (*(s + 1) == 'x' || *(s + 1) == 'X')))  /* check '0x' */
     return 0.0;  /* invalid format (no '0x') */
   s += 2;  /* skip '0x' */
-  r = readhexa(&s, r, &i);  /* read integer part */
+  uint16_t int_part = readhexa(&s, &i, false);  /* read integer part */
+  uint16_t decimal_part = 0;
   if (*s == '.') {
     s++;  /* skip dot */
-    r = readhexa(&s, r, &e);  /* read fractional part */
+    decimal_part = readhexa(&s, &d, true);  /* read fractional part */
   }
-  if (i == 0 && e == 0)
+  if (i == 0 && d == 0)
     return 0.0;  /* invalid format (no digit) */
-  e *= -4;  /* each fractional digit divides value by 2^-4 */
   *endptr = cast(char *, s);  /* valid up to here */
-  if (*s == 'p' || *s == 'P') {  /* exponent part? */
-    int exp1 = 0;
-    int neg1;
-    s++;  /* skip 'p' */
-    neg1 = isneg(&s);  /* signal */
-    if (!lisdigit(cast_uchar(*s)))
-      goto ret;  /* must have at least one digit */
-    while (lisdigit(cast_uchar(*s)))  /* read exponent */
-      exp1 = exp1 * 10 + *(s++) - '0';
-    if (neg1) exp1 = -exp1;
-    e += exp1;
-  }
-  *endptr = cast(char *, s);  /* valid up to here */
- ret:
+  lua_Number r(int16_t(int_part), decimal_part);
   if (neg) r = -r;
-  return l_mathop(ldexp)(r, e);
+  return r;
 }
 
 #endif
