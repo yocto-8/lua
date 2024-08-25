@@ -89,6 +89,10 @@ class LuaFix16 {
 		LUAFIX16_FN_ATTR LuaFix16 atan() const { return LuaFix16::from_fix16(fix16_atan(value)); }
 		LUAFIX16_FN_ATTR LuaFix16 atan2(const LuaFix16 &inY) const { return LuaFix16::from_fix16(fix16_atan2(value, inY.value)); }
 		LUAFIX16_FN_ATTR LuaFix16 sqrt() const { return LuaFix16::from_fix16(fix16_sqrt(value)); }
+
+		LUAFIX16_FN_ATTR uint16_t unsigned_integral_bits() const { return uint32_t(value) >> 16; }
+		LUAFIX16_FN_ATTR int16_t signed_integral_bits() const { return int16_t(value >> 16); }
+		LUAFIX16_FN_ATTR uint16_t decimal_bits() const { return uint16_t(value & 0xFFFF); }
 };
 
 inline LuaFix16 fabs(LuaFix16 x) { return LuaFix16::from_fix16(fix16_abs(x.value)); }
