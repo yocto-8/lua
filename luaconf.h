@@ -22,6 +22,12 @@
 #define lua_assert(c) ([&]() __attribute__((flatten, always_inline)) { if (!(c)) { __builtin_unreachable(); } })()
 #endif
 
+// stock lua stores a pointer to the allocator inside the lua state; in yocto-8
+// we hardcode it to this to avoid an indirect call that can never be inlined
+extern "C" {
+void *y8_lua_realloc(void *ud, void *ptr, size_t osize, size_t nsize);
+}
+
 /*
 @@ LUA_ANSI controls the use of non-ansi features.
 ** CHANGE it (define it) if you want Lua to avoid the use of any

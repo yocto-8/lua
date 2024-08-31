@@ -110,7 +110,7 @@ typedef struct CallInfo {
 ** `global state', shared by all threads of this state
 */
 typedef struct global_State {
-  lua_Alloc frealloc;  /* function to reallocate memory */
+  // lua_Alloc frealloc;  /* function to reallocate memory; replaced by y8_lua_realloc */
   void *ud;         /* auxiliary data to `frealloc' */
   lu_mem totalbytes;  /* number of bytes currently allocated - GCdebt */
   l_mem GCdebt;  /* bytes allocated not yet compensated by the collector */

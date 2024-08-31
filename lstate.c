@@ -230,7 +230,7 @@ static void close_state (lua_State *L) {
   luaZ_freebuffer(L, &g->buff);
   freestack(L);
   lua_assert(gettotalbytes(g) == sizeof(LG));
-  (*g->frealloc)(g->ud, fromstate(L), sizeof(LG), 0);  /* free main block */
+  y8_lua_realloc(g->ud, fromstate(L), sizeof(LG), 0);  /* free main block */
 }
 
 
@@ -277,7 +277,8 @@ LUA_API lua_State *lua_newstate (lua_Alloc f, void *ud) {
   L->marked = luaC_white(g);
   g->gckind = KGC_NORMAL;
   preinit_state(L, g);
-  g->frealloc = f;
+  // g->frealloc = f;
+  lua_assert(f == y8_lua_realloc);
   g->ud = ud;
   g->mainthread = L;
   g->seed = makeseed(L);
