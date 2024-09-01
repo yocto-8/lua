@@ -527,56 +527,58 @@ void luaV_finishOp (lua_State *L) {
         } \
         else { Protect(luaV_arith(L, ra, rb, rc, tm)); } }
 
-#define vmhandlerlocals \
+#define vmhandlertags
+// #define vmhandlertags __attribute__((section(FAST_FUNC_TARGET_SECTION)))
+
+#define vmhandlerlocals(opname) \
+  if (GET_OPCODE(i) != (OpCode)(opname)) { __builtin_unreachable(); } \
+  const vm_handler* handlers = (vm_handler*)handlers_raw; \
+  /*if (handlers != vm_handler_table) { __builtin_unreachable(); }*/ \
+  LClosure *cl = clLvalue(ci->func); \
+  StkId base = ci->u.l.base; \
   [[maybe_unused]] StkId ra = RA(i); \
   [[maybe_unused]] TValue *const k = cl->p->k;
 
 /* nb = no break */
-#define vmcasenb(l,b)	inline void vm##l(lua_State* L, CallInfo *ci, LClosure* cl, StkId base, Instruction i) { \
-  vmhandlerlocals \
+#define vmcasenb(l,b)	inline void vmhandlertags vm##l(lua_State* L, CallInfo* ci, const void* handlers_raw, Instruction i) { \
+  vmhandlerlocals(l) \
   {b} \
-  newframe: vm_enter_frame(L, ci, cl, base, i); \
+  newframe: vm_enter_frame(L, ci, handlers, i); \
 }
 
-#define vmcase(l,b)	inline void vm##l(lua_State* L, CallInfo *ci, LClosure* cl, StkId base, Instruction i) { \
-  vmhandlerlocals \
+#define vmcase(l,b)	inline void vmhandlertags vm##l(lua_State* L, CallInfo* ci, const void* handlers_raw, Instruction i) { \
+  vmhandlerlocals(l) \
   {b} \
-  [[clang::musttail]] return vm_dispatch(L, ci, cl, base, i); \
-  [[maybe_unused]] newframe: vm_enter_frame(L, ci, cl, base, i); \
+  [[clang::musttail]] return vm_dispatch(L, ci, handlers, i); \
+  [[maybe_unused]] newframe: vm_enter_frame(L, ci, handlers, i); \
 }
 
-//#undef lua_assert
-//#define lua_assert(c) ((c) ? 0 : (__builtin_unreachable(), 0))
+#undef lua_assert
+#define lua_assert(c) ((c) ? 0 : (__builtin_unreachable(), 0))
 //#define lua_assert(c) (([&]() __attribute__((flatten, always_inline)) { return (c); })() ? 0 : (__builtin_unreachable(), 0))
 
-#define VM_HANDLER_ARGS lua_State* L, CallInfo *ci, LClosure* cl, StkId base
-
-typedef void (*vm_handler)(lua_State* L, CallInfo *ci, LClosure* cl, StkId base, Instruction i);
+typedef void (*vm_handler)(lua_State* L, CallInfo *ci, const void* handlers_raw, Instruction i);
 
 namespace {
 extern const vm_handler vm_handler_table[41];
 
-inline void vm_dispatch(lua_State* L, CallInfo *ci, LClosure* cl, StkId base, [[maybe_unused]] Instruction i_unused)
+inline void vm_dispatch(lua_State* L, CallInfo *ci, const void* handlers, [[maybe_unused]] Instruction i_unused)
 {
   const Instruction i = *(ci->u.l.savedpc++);
-  lua_assert(base == ci->u.l.base);
-  lua_assert(base <= L->top && L->top < L->stack + L->stacksize);
+  // lua_assert(base == ci->u.l.base);
+  // lua_assert(base <= L->top && L->top < L->stack + L->stacksize);
 
   // if ((L->hookmask & (LUA_MASKLINE | LUA_MASKCOUNT)) &&
   //     (--L->hookcount == 0 || L->hookmask & LUA_MASKLINE)) {
   //   Protect(traceexec(L));
   // }
 
-  [[clang::musttail]] return vm_handler_table[GET_OPCODE(i)](L, ci, cl, base, i);
+  [[clang::musttail]] return ((const vm_handler*)handlers)[GET_OPCODE(i)](L, ci, handlers, i);
 }
 
-inline void vm_enter_frame(lua_State* L, CallInfo *ci, LClosure* cl, StkId base, Instruction i_unused)
+inline void vm_enter_frame(lua_State* L, CallInfo *ci, const vm_handler* handlers, Instruction i_unused)
 {
-  lua_assert(ci == L->ci);
-  cl = clLvalue(ci->func);
-  // k = cl->p->k;
-  base = ci->u.l.base;
-  vm_dispatch(L, ci, cl, base, i_unused);
+  vm_dispatch(L, ci, handlers, i_unused);
 }
 
 vmcase(OP_MOVE,
@@ -954,10 +956,5 @@ const vm_handler vm_handler_table[41] = {
 }
 
 void luaV_execute (lua_State *L) {
-  CallInfo *ci = L->ci;
-  LClosure *cl = clLvalue(ci->func);
-  StkId base = ci->u.l.base;
-
-  vm_dispatch(L, ci, cl, base, 0);
+  vm_dispatch(L, L->ci, vm_handler_table, 0);
 }
-
