@@ -919,15 +919,15 @@ LUALIB_API const char *luaL_gsub (lua_State *L, const char *s, const char *p,
 }
 
 
-static void *l_alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
-  (void)ud; (void)osize;  /* not used */
-  if (nsize == 0) {
-    free(ptr);
-    return NULL;
-  }
-  else
-    return realloc(ptr, nsize);
-}
+// static void *l_alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
+//   (void)ud; (void)osize;  /* not used */
+//   if (nsize == 0) {
+//     free(ptr);
+//     return NULL;
+//   }
+//   else
+//     return realloc(ptr, nsize);
+// }
 
 
 static int panic (lua_State *L) {
@@ -937,11 +937,11 @@ static int panic (lua_State *L) {
 }
 
 
-LUALIB_API lua_State *luaL_newstate (void) {
-  lua_State *L = lua_newstate(l_alloc, NULL);
-  if (L) lua_atpanic(L, &panic);
-  return L;
-}
+// LUALIB_API lua_State *luaL_newstate (void) {
+//   lua_State *L = lua_newstate(l_alloc, NULL);
+//   if (L) lua_atpanic(L, &panic);
+//   return L;
+// }
 
 
 LUALIB_API void luaL_checkversion_ (lua_State *L, lua_Number ver) {

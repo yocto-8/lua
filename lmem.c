@@ -87,7 +87,7 @@ void *luaM_realloc_ (lua_State *L, void *block, size_t osize, size_t nsize) {
                  "realloc cannot fail when shrinking a block");
     if (g->gcrunning) {
       luaC_fullgc(L, 1);  /* try to free some memory... */
-      newblock = y8_lua_realloc(g->ud, block, osize, nsize);  /* try again */
+      newblock = y8_lua_realloc(g->ud, block, osize, nsize, true);  /* try again */
     }
     if (newblock == NULL)
       luaD_throw(L, LUA_ERRMEM);

@@ -267,7 +267,7 @@ LUA_API lua_State *lua_newstate (lua_Alloc f, void *ud) {
   int i;
   lua_State *L;
   global_State *g;
-  LG *l = cast(LG *, (*f)(ud, NULL, LUA_TTHREAD, sizeof(LG)));
+  LG *l = cast(LG *, (*f)(ud, NULL, LUA_TTHREAD, sizeof(LG), true));
   if (l == NULL) return NULL;
   L = &l->l.l;
   g = &l->g;
