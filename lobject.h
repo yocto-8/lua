@@ -238,8 +238,8 @@ typedef struct lua_TValue TValue;
 
 
 #define setobj(L,obj1,obj2) \
-	{ const TValue *io2=(obj2); TValue *io1=(obj1); \
-	  io1->value_ = io2->value_; io1->tt_ = io2->tt_; \
+	{ const TValue io2=*(obj2); TValue *io1=(obj1); \
+	  io1->value_ = io2.value_; io1->tt_ = io2.tt_; \
 	  checkliveness(G(L),io1); }
 
 
@@ -392,6 +392,7 @@ union Value {
   lua_CFunction f; /* light C functions */
   numfield         /* numbers */
 };
+
 
 
 struct lua_TValue {
