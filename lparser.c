@@ -1147,7 +1147,7 @@ static int compound_assignment(LexState *ls, struct LHS_assign *lh, int nvars) {
   int tolevel=fs->nactvar;
   int old_free=fs->freereg;
   expdesc e,infix;
-  double inc=0;
+  // double inc=0;
   int nexps=0,i;
   int line=ls->linenumber;
   struct LHS_assign * assign=lh;
@@ -1221,7 +1221,7 @@ static int compound_assignment(LexState *ls, struct LHS_assign *lh, int nvars) {
     assign=lh;
     {
       int top=ls->fs->freereg-1;
-      int first_top=top;
+      // int first_top=top;
       for(i=0;i<nvars-nexps;i++) {
         infix=assign->v;
         luaK_infix(fs,op,&infix);
