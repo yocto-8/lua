@@ -324,8 +324,10 @@ int luaD_precall (lua_State *L, StkId func, int nresults) {
       lua_assert(ci->top <= L->stack_last);
       ci->callstatus = 0;
       luaC_checkGC(L);  /* stack grow uses memory */
+#ifdef Y8_LUA_ALLOW_HOOKMASKS
       if (L->hookmask & LUA_MASKCALL)
         luaD_hook(L, LUA_HOOKCALL, -1);
+#endif
       lua_unlock(L);
       n = (*f)(L);  /* do the actual call */
       lua_lock(L);
@@ -358,8 +360,10 @@ int luaD_precall (lua_State *L, StkId func, int nresults) {
       ci->callstatus = CIST_LUA;
       L->top = ci->top;
       luaC_checkGC(L);  /* stack grow uses memory */
+#ifdef Y8_LUA_ALLOW_HOOKMASKS
       if (L->hookmask & LUA_MASKCALL)
         callhook(L, ci);
+#endif
       return 0;
     }
     default: {  /* not a function */
@@ -374,6 +378,7 @@ int luaD_poscall (lua_State *L, StkId firstResult) {
   StkId res;
   int wanted, i;
   CallInfo *ci = L->ci;
+#ifdef Y8_LUA_ALLOW_HOOKMASKS
   if (L->hookmask & (LUA_MASKRET | LUA_MASKLINE)) {
     if (L->hookmask & LUA_MASKRET) {
       ptrdiff_t fr = savestack(L, firstResult);  /* hook may change stack */
@@ -382,6 +387,7 @@ int luaD_poscall (lua_State *L, StkId firstResult) {
     }
     L->oldpc = ci->previous->u.l.savedpc;  /* 'oldpc' for caller function */
   }
+#endif
   res = ci->func;  /* res == final position of 1st result */
   wanted = ci->nresults;
   L->ci = ci = ci->previous;  /* back to caller */

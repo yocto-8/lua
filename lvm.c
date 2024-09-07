@@ -58,8 +58,10 @@ int luaV_tostring (lua_State *L, StkId obj) {
 }
 
 
+#ifdef Y8_LUA_ALLOW_HOOKMASKS
 static void traceexec (lua_State *L) {
   CallInfo *ci = L->ci;
+
   lu_byte mask = L->hookmask;
   int counthook = ((mask & LUA_MASKCOUNT) && L->hookcount == 0);
   if (counthook)
@@ -89,6 +91,7 @@ static void traceexec (lua_State *L) {
     luaD_throw(L, LUA_YIELD);
   }
 }
+#endif
 
 
 static void callTM (lua_State *L, const TValue *f, const TValue *p1,
@@ -572,10 +575,13 @@ void luaV_execute (lua_State *L) {
 
   Instruction i;
   StkId ra;
-  /*if ((L->hookmask & (LUA_MASKLINE | LUA_MASKCOUNT)) &&
+
+#ifdef Y8_LUA_ALLOW_HOOKMASKS
+  if ((L->hookmask & (LUA_MASKLINE | LUA_MASKCOUNT)) &&
       (--L->hookcount == 0 || L->hookmask & LUA_MASKLINE)) {
     Protect(traceexec(L));
-  }*/
+  }
+#endif
 
   /* WARNING: several calls may realloc the stack and invalidate `ra' */
 
