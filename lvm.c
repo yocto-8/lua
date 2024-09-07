@@ -134,6 +134,24 @@ void luaV_gettable (lua_State *L, const TValue *t, TValue *key, StkId val) {
 }
 
 
+void luaV_gettable_upvalue_fast (lua_State *L, const TValue *t, TValue *key, StkId val) {
+  lua_assert(ttistable(t));
+
+  if (ttype(key) != LUA_TSHRSTR) [[unlikely]] {
+    // fallback to slow path
+    return luaV_gettable(L, t, key, val);
+  }
+
+  Table *h = hvalue(t);
+  const TValue *res = luaH_getstr(h, rawtsvalue(key));
+
+  lua_assert(!ttisnil(res) ||  /* result is not nil? */
+            (tm = fasttm(L, h->metatable, TM_INDEX)) == NULL);
+
+  setobj2s(L, val, res);
+}
+
+
 void luaV_settable (lua_State *L, const TValue *t, TValue *key, StkId val) {
   int loop;
   for (loop = 0; loop < MAXTAGLOOP; loop++) {
@@ -651,7 +669,7 @@ void luaV_execute (lua_State *L) {
     )
     vmcase(OP_GETTABUP,
       int b = GETARG_B(i);
-      Protect(luaV_gettable(L, cl->upvals[b]->v, RKC(i), ra));
+      Protect(luaV_gettable_upvalue_fast(L, cl->upvals[b]->v, RKC(i), ra));
     )
     vmcase(OP_GETTABLE,
       Protect(luaV_gettable(L, RB(i), RKC(i), ra));
