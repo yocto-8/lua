@@ -145,6 +145,9 @@ void luaV_gettable_upvalue_fast (lua_State *L, const TValue *t, TValue *key, Stk
     return luaV_gettable(L, t, key, val);
   }
 
+  // NOTE: this may have unexpected behavior if doing metatable shenanigans to
+  // the `_ENV`
+
   Table *h = hvalue(t);
   const TValue *res = luaH_getstr(h, rawtsvalue(key));
 
@@ -191,6 +194,39 @@ void luaV_settable (lua_State *L, const TValue *t, TValue *key, StkId val) {
     t = tm;  /* else repeat with 'tm' */
   }
   luaG_runerror(L, "loop in settable");
+}
+
+
+void luaV_settable_upvalue_fast (lua_State *L, const TValue *t, TValue *key, StkId val) {
+  lua_assert(ttisvalue(t));
+
+  if (ttype(key) != LUA_TSHRSTR) [[unlikely]] {
+    // fallback to slow path
+    return luaV_settable(L, t, key, val);
+  }
+
+  Table *h = hvalue(t);
+  const TValue *res = luaH_getstr(h, rawtsvalue(key));
+
+  // NOTE: this may have unexpected behavior if doing metatable shenanigans to
+  // the `_ENV`
+
+  TValue *oldval = cast(TValue *, res);
+
+  [[maybe_unused]] bool lookup_or_insert_success = (!ttisnil(oldval) ||
+      /* previous value is nil; must check the metamethod */
+      // ((tm = fasttm(L, h->metatable, TM_NEWINDEX)) == NULL && // ... not: assume nothing done to the _ENV metatable
+      /* no metamethod; is there a previous entry in the table? */
+      (oldval != luaO_nilobject ||
+      /* no previous entry; must create one. (The next test is
+        always true; we only need the assignment.) */
+      (oldval = luaH_newkey(L, h, key), 1)));
+
+  lua_assert(lookup_or_insert_success);
+
+  setobj2t(L, oldval, val);  /* assign new value to that entry */
+  // invalidateTMcache(h); // we assume nothing may have been done to the metatable of the _ENV
+  luaC_barrierback(L, obj2gco(h), val);
 }
 
 
@@ -682,7 +718,7 @@ void luaV_execute (lua_State *L) {
     )
     vmcase(OP_SETTABUP,
       int a = GETARG_A(i);
-      Protect(luaV_settable(L, cl->upvals[a]->v, RKB(i), RKC(i)));
+      Protect(luaV_settable_upvalue_fast(L, cl->upvals[a]->v, RKB(i), RKC(i)));
     )
     vmcase(OP_SETUPVAL,
       UpVal *uv = cl->upvals[GETARG_B(i)];
@@ -954,7 +990,8 @@ void luaV_execute (lua_State *L) {
       }
     )
     vmcase(OP_EXTRAARG,
-      lua_assert(0);
+      __builtin_unreachable();
+      //lua_assert(0);
     )
 }
 

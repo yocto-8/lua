@@ -36,6 +36,8 @@ inline LUAI_FUNC void luaV_gettable_upvalue_fast (lua_State *L, const TValue *t,
                                             StkId val);
 LUAI_FUNC void luaV_settable (lua_State *L, const TValue *t, TValue *key,
                                             StkId val);
+LUAI_FUNC void luaV_settable_upvalue_fast (lua_State *L, const TValue *t, TValue *key,
+                                            StkId val);
 LUAI_FUNC void luaV_finishOp (lua_State *L);
 LUAI_FUNC void luaV_execute (lua_State *L);
 LUAI_FUNC void luaV_concat (lua_State *L, int total);
