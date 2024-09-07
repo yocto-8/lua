@@ -48,7 +48,7 @@
 */
 #if !defined(LUAI_THROW)
 
-#if defined(YOCTO8_YOLO_RELEASE)
+#if defined(Y8_YOLO_RELEASE)
 #define LUAI_THROW(L,c) __builtin_unreachable()
 #define LUAI_TRY(L,c,a) { a }
 #define luai_jmpbuf		int
@@ -87,7 +87,7 @@ struct lua_longjmp {
 
 
 static void seterrorobj (lua_State *L, int errcode, StkId oldtop) {
-#ifdef YOCTO8_YOLO_RELEASE
+#ifdef Y8_YOLO_RELEASE
   __builtin_unreachable();
 #endif
   switch (errcode) {
@@ -109,7 +109,7 @@ static void seterrorobj (lua_State *L, int errcode, StkId oldtop) {
 
 
 l_noret luaD_throw (lua_State *L, int errcode) {
-#ifdef YOCTO8_YOLO_RELEASE
+#ifdef Y8_YOLO_RELEASE
   __builtin_unreachable();
 #endif
   if (L->errorJmp) {  /* thread has an error handler? */

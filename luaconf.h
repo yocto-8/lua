@@ -18,7 +18,7 @@
 ** ===================================================================
 */
 
-#ifdef YOCTO8_YOLO_RELEASE
+#ifdef Y8_YOLO_RELEASE
 #define lua_assert(c) ([&]() __attribute__((flatten, always_inline)) { if (!(c)) { __builtin_unreachable(); } })()
 #endif
 

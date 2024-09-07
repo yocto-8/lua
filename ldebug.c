@@ -529,7 +529,7 @@ static const char *getupvalname (CallInfo *ci, const TValue *o,
 
 
 l_noret luaG_typeerror (lua_State *L, const TValue *o, const char *op) {
-#ifdef YOCTO8_YOLO_RELEASE
+#ifdef Y8_YOLO_RELEASE
   __builtin_unreachable();
 #endif
   CallInfo *ci = L->ci;
@@ -551,7 +551,7 @@ l_noret luaG_typeerror (lua_State *L, const TValue *o, const char *op) {
 
 
 l_noret luaG_concaterror (lua_State *L, StkId p1, StkId p2) {
-#ifdef YOCTO8_YOLO_RELEASE
+#ifdef Y8_YOLO_RELEASE
   __builtin_unreachable();
 #endif
   if (ttisstring(p1) || ttisnumber(p1)) p1 = p2;
@@ -561,7 +561,7 @@ l_noret luaG_concaterror (lua_State *L, StkId p1, StkId p2) {
 
 
 l_noret luaG_aritherror (lua_State *L, const TValue *p1, const TValue *p2) {
-#ifdef YOCTO8_YOLO_RELEASE
+#ifdef Y8_YOLO_RELEASE
   __builtin_unreachable();
 #endif
   TValue temp;
@@ -572,7 +572,7 @@ l_noret luaG_aritherror (lua_State *L, const TValue *p1, const TValue *p2) {
 
 
 l_noret luaG_ordererror (lua_State *L, const TValue *p1, const TValue *p2) {
-#ifdef YOCTO8_YOLO_RELEASE
+#ifdef Y8_YOLO_RELEASE
   __builtin_unreachable();
 #endif
   const char *t1 = objtypename(p1);
@@ -601,7 +601,7 @@ static void addinfo (lua_State *L, const char *msg) {
 
 
 l_noret luaG_errormsg (lua_State *L) {
-#ifdef YOCTO8_YOLO_RELEASE
+#ifdef Y8_YOLO_RELEASE
   __builtin_unreachable();
 #endif
   if (L->errfunc != 0) {  /* is there an error handling function? */
@@ -617,7 +617,7 @@ l_noret luaG_errormsg (lua_State *L) {
 
 
 l_noret luaG_runerror (lua_State *L, const char *fmt, ...) {
-#ifdef YOCTO8_YOLO_RELEASE
+#ifdef Y8_YOLO_RELEASE
   __builtin_unreachable();
 #endif
   va_list argp;
