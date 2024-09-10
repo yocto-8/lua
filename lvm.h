@@ -32,7 +32,7 @@ LUAI_FUNC const TValue *luaV_tonumber (const TValue *obj, TValue *n);
 LUAI_FUNC int luaV_tostring (lua_State *L, StkId obj);
 LUAI_FUNC void luaV_gettable (lua_State *L, const TValue *t, TValue *key,
                                             StkId val);
-inline LUAI_FUNC void luaV_gettable_upvalue_fast (lua_State *L, const TValue *t, TValue *key,
+LUAI_FUNC void luaV_gettable_upvalue_fast (lua_State *L, const TValue *t, TValue *key,
                                             StkId val);
 LUAI_FUNC void luaV_settable (lua_State *L, const TValue *t, TValue *key,
                                             StkId val);
