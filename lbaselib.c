@@ -447,8 +447,9 @@ static const luaL_Reg base_funcs[] = {
 LUAMOD_API int luaopen_base (lua_State *L) {
   /* set global _G */
   lua_pushglobaltable(L);
-  lua_pushglobaltable(L);
-  lua_setfield(L, -2, "_G");
+  // yocto-8: p8 doesn't expose _G
+  // lua_pushglobaltable(L);
+  // lua_setfield(L, -2, "_G");
   /* open lib into global table */
   luaL_setfuncs(L, base_funcs, 0);
   lua_pushliteral(L, LUA_VERSION);
