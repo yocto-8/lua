@@ -444,9 +444,12 @@ void *y8_lua_realloc(void *ud, void *ptr, size_t osize, size_t nsize, bool must_
 @@ The luai_num* macros define the primitive operations over numbers.
 */
 
-#define luai_numidiv(L,a,b) (floor((a)/(b)))
-#define luai_nummod(L,a,b) ((a)%(b))
-#define luai_numpow(L,a,b) (pow((a), (b)))
+// numidiv here is correct as the division cancels out the multiplication factor
+// of a and b, and the output type is int. neat
+// TODO: luai_numpow as proper fixed point
+#define luai_numidiv(L,a,b) ((int32_t)(a)/(int32_t)(b))
+#define luai_nummod(L,a,b) ((lua_Number)(a)%(lua_Number)(b))
+#define luai_numpow(L,a,b) ((lua_Number)pow(double(a), double(b)))
 
 // /* the following operations need the math library */
 // #if defined(lobject_c) || defined(lvm_c)
