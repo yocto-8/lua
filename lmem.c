@@ -18,6 +18,7 @@
 #include "lmem.h"
 #include "lobject.h"
 #include "lstate.h"
+#include "../../src/emu/alloc.hpp" // yocto-8 HACK for inlining heap stuff
 
 
 

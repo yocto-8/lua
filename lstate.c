@@ -24,6 +24,7 @@
 #include "lstring.h"
 #include "ltable.h"
 #include "ltm.h"
+#include "../../src/emu/alloc.hpp" // yocto-8 HACK for inlining heap stuff
 
 
 #if !defined(LUAI_GCPAUSE)
