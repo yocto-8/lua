@@ -5,6 +5,7 @@
 */
 
 
+#include <assert.h>
 #include <setjmp.h>
 #include <stdlib.h>
 #include <string.h>
@@ -659,11 +660,13 @@ static void f_parser (lua_State *L, void *ud) {
   Closure *cl;
   struct SParser *p = cast(struct SParser *, ud);
   int c = zgetc(p->z);  /* read first character */
-  if (c == LUA_SIGNATURE[0]) {
-    checkmode(L, p->mode, "binary");
-    cl = luaU_undump(L, p->z, &p->buff, p->name);
-  }
-  else {
+  assert(c != LUA_SIGNATURE[0 && "yocto-8 strips out binary load functionality"]);
+  // if (c == LUA_SIGNATURE[0]) {
+  //   checkmode(L, p->mode, "binary");
+  //   cl = luaU_undump(L, p->z, &p->buff, p->name);
+  // }
+  // else
+  {
     checkmode(L, p->mode, "text");
     cl = luaY_parser(L, p->z, &p->buff, &p->dyd, p->name, c);
   }
