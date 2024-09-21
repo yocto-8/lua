@@ -994,19 +994,19 @@ LUA_API int lua_load (lua_State *L, lua_Reader reader, void *data,
 }
 
 
-LUA_API int lua_dump (lua_State *L, lua_Writer writer, void *data) {
-  int status;
-  TValue *o;
-  lua_lock(L);
-  api_checknelems(L, 1);
-  o = L->top - 1;
-  if (isLfunction(o))
-    status = luaU_dump(L, getproto(o), writer, data, 0);
-  else
-    status = 1;
-  lua_unlock(L);
-  return status;
-}
+// LUA_API int lua_dump (lua_State *L, lua_Writer writer, void *data) {
+//   int status;
+//   TValue *o;
+//   lua_lock(L);
+//   api_checknelems(L, 1);
+//   o = L->top - 1;
+//   if (isLfunction(o))
+//     status = luaU_dump(L, getproto(o), writer, data, 0);
+//   else
+//     status = 1;
+//   lua_unlock(L);
+//   return status;
+// }
 
 
 LUA_API int lua_status (lua_State *L) {
