@@ -49,7 +49,7 @@ const char lua_ident[] =
 ** to be called by 'lua_checkstack' in protected mode, to grow stack
 ** capturing memory errors
 */
-LUA_FAST static void growstack (lua_State *L, void *ud) {
+static void growstack (lua_State *L, void *ud) {
   int size = *(int *)ud;
   luaD_growstack(L, size);
 }
@@ -169,7 +169,7 @@ LUA_API void lua_insert (lua_State *L, int idx) {
 }
 
 
-LUA_FAST static void moveto (lua_State *L, TValue *fr, int idx) {
+static void moveto (lua_State *L, TValue *fr, int idx) {
   TValue *to = index2addr(L, idx);
   api_checkvalidindex(L, to);
   setobj(L, to, fr);
@@ -884,7 +884,7 @@ struct CallS {  /* data to `f_call' */
 };
 
 
-LUA_FAST static void f_call (lua_State *L, void *ud) {
+static void f_call (lua_State *L, void *ud) {
   struct CallS *c = cast(struct CallS *, ud);
   luaD_call(L, c->func, c->nresults, 0);
 }
@@ -1151,7 +1151,7 @@ LUA_API void *lua_newuserdata (lua_State *L, size_t size) {
 
 
 
-LUA_FAST static const char *aux_upvalue (StkId fi, int n, TValue **val,
+static const char *aux_upvalue (StkId fi, int n, TValue **val,
                                 GCObject **owner) {
   switch (ttype(fi)) {
     case LUA_TCCL: {  /* C closure */
@@ -1209,7 +1209,7 @@ LUA_API const char *lua_setupvalue (lua_State *L, int funcindex, int n) {
 }
 
 
-LUA_FAST static UpVal **getupvalref (lua_State *L, int fidx, int n, LClosure **pf) {
+static UpVal **getupvalref (lua_State *L, int fidx, int n, LClosure **pf) {
   LClosure *f;
   StkId fi = index2addr(L, fidx);
   api_check(L, ttisLclosure(fi), "Lua function expected");
