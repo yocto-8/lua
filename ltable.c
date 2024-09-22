@@ -443,6 +443,7 @@ TValue *luaH_newkey (lua_State *L, Table *t, const TValue *key) {
 /*
 ** search function for integers
 */
+[[gnu::always_inline]]
 const TValue *luaH_getint (Table *t, int key) {
   /* (1 <= key && key <= t->sizearray) */
   if (cast(unsigned int, key-1) < cast(unsigned int, t->sizearray)) [[likely]]
@@ -463,6 +464,7 @@ const TValue *luaH_getint (Table *t, int key) {
 /*
 ** search function for short strings
 */
+[[gnu::always_inline]]
 const TValue *luaH_getstr (Table *t, TString *key) {
   Node *n = hashstr(t, key);
   lua_assert(key->tsv.tt == LUA_TSHRSTR);
@@ -478,6 +480,7 @@ const TValue *luaH_getstr (Table *t, TString *key) {
 /*
 ** main search function
 */
+[[gnu::always_inline]]
 const TValue *luaH_get (Table *t, const TValue *key) {
   switch (ttype(key)) {
     case LUA_TSHRSTR: return luaH_getstr(t, rawtsvalue(key));
@@ -507,6 +510,7 @@ const TValue *luaH_get (Table *t, const TValue *key) {
 ** beware: when using this function you probably need to check a GC
 ** barrier and invalidate the TM cache.
 */
+[[gnu::always_inline]]
 TValue *luaH_set (lua_State *L, Table *t, const TValue *key) {
   const TValue *p = luaH_get(t, key);
   if (p != luaO_nilobject)
@@ -515,6 +519,7 @@ TValue *luaH_set (lua_State *L, Table *t, const TValue *key) {
 }
 
 
+[[gnu::always_inline]]
 void luaH_setint (lua_State *L, Table *t, int key, TValue *value) {
   const TValue *p = luaH_getint(t, key);
   TValue *cell;
