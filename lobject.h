@@ -592,16 +592,16 @@ typedef struct Table {
 LUAI_DDEC const TValue luaO_nilobject_;
 
 
-LUAI_FUNC int luaO_int2fb (unsigned int x);
-LUAI_FUNC int luaO_fb2int (int x);
-LUAI_FUNC int luaO_ceillog2 (unsigned int x);
-LUAI_FUNC lua_Number luaO_arith (int op, lua_Number v1, lua_Number v2);
-LUAI_FUNC int luaO_str2d (const char *s, size_t len, lua_Number *result);
-LUAI_FUNC int luaO_hexavalue (int c);
-LUAI_FUNC const char *luaO_pushvfstring (lua_State *L, const char *fmt,
+LUA_FAST LUAI_FUNC int luaO_int2fb (unsigned int x);
+LUA_FAST LUAI_FUNC int luaO_fb2int (int x);
+LUA_FAST LUAI_FUNC int luaO_ceillog2 (unsigned int x);
+LUA_FAST LUAI_FUNC lua_Number luaO_arith (int op, lua_Number v1, lua_Number v2);
+LUA_FAST LUAI_FUNC int luaO_str2d (const char *s, size_t len, lua_Number *result);
+LUA_FAST LUAI_FUNC int luaO_hexavalue (int c);
+LUA_FAST LUAI_FUNC const char *luaO_pushvfstring (lua_State *L, const char *fmt,
                                                        va_list argp);
-LUAI_FUNC const char *luaO_pushfstring (lua_State *L, const char *fmt, ...);
-LUAI_FUNC void luaO_chunkid (char *out, const char *source, size_t len);
+LUA_FAST LUAI_FUNC const char *luaO_pushfstring (lua_State *L, const char *fmt, ...);
+LUA_FAST LUAI_FUNC void luaO_chunkid (char *out, const char *source, size_t len);
 
 
 #endif

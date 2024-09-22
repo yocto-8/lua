@@ -77,7 +77,7 @@ static const Node dummynode_ = {
 /*
 ** hash for lua_Numbers
 */
-static Node *hashnum (const Table *t, lua_Number n) {
+LUA_FAST static Node *hashnum (const Table *t, lua_Number n) {
   int i;
   luai_hashnum(i, n);
   if (i < 0) {
@@ -94,7 +94,7 @@ static Node *hashnum (const Table *t, lua_Number n) {
 ** returns the `main' position of an element in a table (that is, the index
 ** of its hash value)
 */
-static Node *mainposition (const Table *t, const TValue *key) {
+LUA_FAST static Node *mainposition (const Table *t, const TValue *key) {
   switch (ttype(key)) {
     case LUA_TNUMBER:
       return hashnum(t, nvalue(key));
@@ -124,7 +124,7 @@ static Node *mainposition (const Table *t, const TValue *key) {
 ** returns the index for `key' if `key' is an appropriate key to live in
 ** the array part of the table, -1 otherwise.
 */
-static int arrayindex (const TValue *key) {
+LUA_FAST static int arrayindex (const TValue *key) {
   if (ttisnumber(key)) {
     lua_Number n = nvalue(key);
     int k;
@@ -141,7 +141,7 @@ static int arrayindex (const TValue *key) {
 ** elements in the array part, then elements in the hash part. The
 ** beginning of a traversal is signaled by -1.
 */
-static int findindex (lua_State *L, Table *t, StkId key) {
+LUA_FAST static int findindex (lua_State *L, Table *t, StkId key) {
   int i;
   if (ttisnil(key)) return -1;  /* first iteration */
   i = arrayindex(key);
@@ -193,7 +193,7 @@ int luaH_next (lua_State *L, Table *t, StkId key) {
 */
 
 
-static int computesizes (int nums[], int *narray) {
+LUA_FAST static int computesizes (int nums[], int *narray) {
   int i;
   int twotoi;  /* 2^i */
   int a = 0;  /* number of elements smaller than 2^i */
@@ -215,7 +215,7 @@ static int computesizes (int nums[], int *narray) {
 }
 
 
-static int countint (const TValue *key, int *nums) {
+LUA_FAST static int countint (const TValue *key, int *nums) {
   int k = arrayindex(key);
   if (0 < k && k <= MAXASIZE) {  /* is `key' an appropriate array index? */
     nums[luaO_ceillog2(k)]++;  /* count as such */
@@ -226,7 +226,7 @@ static int countint (const TValue *key, int *nums) {
 }
 
 
-static int numusearray (const Table *t, int *nums) {
+LUA_FAST static int numusearray (const Table *t, int *nums) {
   int lg;
   int ttlg;  /* 2^lg */
   int ause = 0;  /* summation of `nums' */
@@ -251,7 +251,7 @@ static int numusearray (const Table *t, int *nums) {
 }
 
 
-static int numusehash (const Table *t, int *nums, int *pnasize) {
+LUA_FAST static int numusehash (const Table *t, int *nums, int *pnasize) {
   int totaluse = 0;  /* total number of elements */
   int ause = 0;  /* summation of `nums' */
   int i = sizenode(t);
@@ -267,7 +267,7 @@ static int numusehash (const Table *t, int *nums, int *pnasize) {
 }
 
 
-static void setarrayvector (lua_State *L, Table *t, int size) {
+LUA_FAST static void setarrayvector (lua_State *L, Table *t, int size) {
   int i;
   luaM_reallocvector(L, t->array, t->sizearray, size, TValue);
   for (i=t->sizearray; i<size; i++)
@@ -276,7 +276,7 @@ static void setarrayvector (lua_State *L, Table *t, int size) {
 }
 
 
-static void setnodevector (lua_State *L, Table *t, int size) {
+LUA_FAST static void setnodevector (lua_State *L, Table *t, int size) {
   int lsize;
   if (size == 0) {  /* no elements to hash part? */
     t->node = cast(Node *, dummynode);  /* use common `dummynode' */
@@ -340,7 +340,7 @@ void luaH_resizearray (lua_State *L, Table *t, int nasize) {
 }
 
 
-static void rehash (lua_State *L, Table *t, const TValue *ek) {
+LUA_FAST static void rehash (lua_State *L, Table *t, const TValue *ek) {
   int nasize, na;
   int nums[MAXBITS+1];  /* nums[i] = number of keys with 2^(i-1) < k <= 2^i */
   int i;
@@ -384,7 +384,7 @@ void luaH_free (lua_State *L, Table *t) {
 }
 
 
-static Node *getfreepos (Table *t) {
+LUA_FAST static Node *getfreepos (Table *t) {
   while (t->lastfree > t->node) {
     t->lastfree--;
     if (ttisnil(gkey(t->lastfree)))
@@ -534,7 +534,7 @@ void luaH_setint (lua_State *L, Table *t, int key, TValue *value) {
 }
 
 
-static int unbound_search (Table *t, unsigned int j) {
+LUA_FAST static int unbound_search (Table *t, unsigned int j) {
   unsigned int i = j;  /* i is zero or a present index */
   j++;
   /* find `i' and `j' such that i is present and j is not */

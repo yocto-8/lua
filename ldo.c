@@ -87,7 +87,7 @@ struct lua_longjmp {
 };
 
 
-static void seterrorobj (lua_State *L, int errcode, StkId oldtop) {
+LUA_FAST static void seterrorobj (lua_State *L, int errcode, StkId oldtop) {
 #ifdef Y8_YOLO_RELEASE
   __builtin_unreachable();
 #endif
@@ -109,7 +109,7 @@ static void seterrorobj (lua_State *L, int errcode, StkId oldtop) {
 }
 
 
-l_noret luaD_throw (lua_State *L, int errcode) {
+LUA_FAST l_noret luaD_throw (lua_State *L, int errcode) {
 #ifdef Y8_YOLO_RELEASE
   __builtin_unreachable();
 #endif
@@ -151,7 +151,7 @@ int luaD_rawrunprotected (lua_State *L, Pfunc f, void *ud) {
 /* }====================================================== */
 
 
-static void correctstack (lua_State *L, TValue *oldstack) {
+LUA_FAST static void correctstack (lua_State *L, TValue *oldstack) {
   CallInfo *ci;
   GCObject *up;
   L->top = (L->top - oldstack) + L->stack;
@@ -203,7 +203,7 @@ void luaD_growstack (lua_State *L, int n) {
 }
 
 
-static int stackinuse (lua_State *L) {
+LUA_FAST static int stackinuse (lua_State *L) {
   CallInfo *ci;
   StkId lim = L->top;
   for (ci = L->ci; ci != NULL; ci = ci->previous) {
@@ -253,7 +253,7 @@ void luaD_hook (lua_State *L, int event, int line) {
 }
 
 
-static void callhook (lua_State *L, CallInfo *ci) {
+LUA_FAST static void callhook (lua_State *L, CallInfo *ci) {
   int hook = LUA_HOOKCALL;
   ci->u.l.savedpc++;  /* hooks assume 'pc' is already incremented */
   if (isLua(ci->previous) &&
@@ -266,7 +266,7 @@ static void callhook (lua_State *L, CallInfo *ci) {
 }
 
 
-static StkId adjust_varargs (lua_State *L, Proto *p, int actual) {
+LUA_FAST static StkId adjust_varargs (lua_State *L, Proto *p, int actual) {
   int i;
   int nfixargs = p->numparams;
   StkId base, fixed;
@@ -283,7 +283,7 @@ static StkId adjust_varargs (lua_State *L, Proto *p, int actual) {
 }
 
 
-static StkId tryfuncTM (lua_State *L, StkId func) {
+LUA_FAST static StkId tryfuncTM (lua_State *L, StkId func) {
   const TValue *tm = luaT_gettmbyobj(L, func, TM_CALL);
   StkId p;
   ptrdiff_t funcr = savestack(L, func);
@@ -423,7 +423,7 @@ void luaD_call (lua_State *L, StkId func, int nResults, int allowyield) {
 }
 
 
-static void finishCcall (lua_State *L) {
+LUA_FAST static void finishCcall (lua_State *L) {
   CallInfo *ci = L->ci;
   int n;
   lua_assert(ci->u.c.k != NULL);  /* must have a continuation */
@@ -448,7 +448,7 @@ static void finishCcall (lua_State *L) {
 }
 
 
-static void unroll (lua_State *L, void *ud) {
+LUA_FAST static void unroll (lua_State *L, void *ud) {
   UNUSED(ud);
   for (;;) {
     if (L->ci == &L->base_ci)  /* stack is empty? */
@@ -466,7 +466,7 @@ static void unroll (lua_State *L, void *ud) {
 /*
 ** check whether thread has a suspended protected call
 */
-static CallInfo *findpcall (lua_State *L) {
+LUA_FAST static CallInfo *findpcall (lua_State *L) {
   CallInfo *ci;
   for (ci = L->ci; ci != NULL; ci = ci->previous) {  /* search for a pcall */
     if (ci->callstatus & CIST_YPCALL)
@@ -476,7 +476,7 @@ static CallInfo *findpcall (lua_State *L) {
 }
 
 
-static int recover (lua_State *L, int status) {
+LUA_FAST static int recover (lua_State *L, int status) {
   StkId oldtop;
   CallInfo *ci = findpcall(L);
   if (ci == NULL) return 0;  /* no recovery point */
@@ -500,7 +500,7 @@ static int recover (lua_State *L, int status) {
 ** coroutine itself. (Such errors should not be handled by any coroutine
 ** error handler and should not kill the coroutine.)
 */
-static l_noret resume_error (lua_State *L, const char *msg, StkId firstArg) {
+LUA_FAST static l_noret resume_error (lua_State *L, const char *msg, StkId firstArg) {
   L->top = firstArg;  /* remove args from the stack */
   setsvalue2s(L, L->top, luaS_new(L, msg));  /* push error message */
   api_incr_top(L);
@@ -511,7 +511,7 @@ static l_noret resume_error (lua_State *L, const char *msg, StkId firstArg) {
 /*
 ** do the work for 'lua_resume' in protected mode
 */
-static void resume (lua_State *L, void *ud) {
+LUA_FAST static void resume (lua_State *L, void *ud) {
   int nCcalls = L->nCcalls;
   StkId firstArg = cast(StkId, ud);
   CallInfo *ci = L->ci;

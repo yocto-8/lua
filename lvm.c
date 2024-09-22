@@ -94,7 +94,7 @@ static void traceexec (lua_State *L) {
 #endif
 
 
-static void callTM (lua_State *L, const TValue *f, const TValue *p1,
+LUA_FAST static void callTM (lua_State *L, const TValue *f, const TValue *p1,
                     const TValue *p2, TValue *p3, int hasres) {
   ptrdiff_t result = savestack(L, p3);
   setobj2s(L, L->top++, f);  /* push function */
@@ -200,7 +200,7 @@ void luaV_settable_upvalue_fast (lua_State *L, const TValue *t, TValue *key, Stk
 }
 
 
-static int call_binTM (lua_State *L, const TValue *p1, const TValue *p2,
+LUA_FAST static int call_binTM (lua_State *L, const TValue *p1, const TValue *p2,
                        StkId res, TMS event) {
   const TValue *tm = luaT_gettmbyobj(L, p1, event);  /* try first operand */
   if (ttisnil(tm))
@@ -211,7 +211,7 @@ static int call_binTM (lua_State *L, const TValue *p1, const TValue *p2,
 }
 
 
-static const TValue *get_equalTM (lua_State *L, Table *mt1, Table *mt2,
+LUA_FAST static const TValue *get_equalTM (lua_State *L, Table *mt1, Table *mt2,
                                   TMS event) {
   const TValue *tm1 = fasttm(L, mt1, event);
   const TValue *tm2;
@@ -225,7 +225,7 @@ static const TValue *get_equalTM (lua_State *L, Table *mt1, Table *mt2,
 }
 
 
-static int call_orderTM (lua_State *L, const TValue *p1, const TValue *p2,
+LUA_FAST static int call_orderTM (lua_State *L, const TValue *p1, const TValue *p2,
                          TMS event) {
   if (!call_binTM(L, p1, p2, L->top, event))
     return -1;  /* no metamethod */
@@ -234,7 +234,7 @@ static int call_orderTM (lua_State *L, const TValue *p1, const TValue *p2,
 }
 
 
-static int l_strcmp (const TString *ls, const TString *rs) {
+LUA_FAST static int l_strcmp (const TString *ls, const TString *rs) {
   const char *l = getstr(ls);
   size_t ll = ls->tsv.len;
   const char *r = getstr(rs);
@@ -404,7 +404,7 @@ void luaV_arith (lua_State *L, StkId ra, const TValue *rb,
 ** whether there is a cached closure with the same upvalues needed by
 ** new closure to be created.
 */
-static Closure *getcached (Proto *p, UpVal **encup, StkId base) {
+LUA_FAST static Closure *getcached (Proto *p, UpVal **encup, StkId base) {
   Closure *c = p->cache;
   if (c != NULL) {  /* is there a cached closure? */
     int nup = p->sizeupvalues;
@@ -426,7 +426,7 @@ static Closure *getcached (Proto *p, UpVal **encup, StkId base) {
 ** before the assignment to 'p->cache', as the function needs the
 ** original value of that field.
 */
-static void pushclosure (lua_State *L, Proto *p, UpVal **encup, StkId base,
+LUA_FAST static void pushclosure (lua_State *L, Proto *p, UpVal **encup, StkId base,
                          StkId ra) {
   int nup = p->sizeupvalues;
   Upvaldesc *uv = p->upvalues;

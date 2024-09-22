@@ -186,7 +186,8 @@ void *y8_lua_realloc(void *ud, void *ptr, size_t osize, size_t nsize, bool must_
 */
 #if defined(__GNUC__) && ((__GNUC__*100 + __GNUC_MINOR__) >= 302) && \
     defined(__ELF__)		/* { */
-#define LUAI_FUNC	__attribute__((visibility("hidden"), hot, section(Y8_SRAM_SECTION))) extern
+#define LUA_FAST	__attribute__((section(Y8_SRAM_SECTION), hot))
+#define LUAI_FUNC	__attribute__((visibility("hidden"))) extern
 #define LUAI_DDEC	__attribute__((visibility("hidden"))) extern
 #define LUAI_DDEF	/* empty */
 
