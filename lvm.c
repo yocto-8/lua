@@ -111,6 +111,7 @@ static void callTM (lua_State *L, const TValue *f, const TValue *p1,
 }
 
 
+[[gnu::always_inline]]
 void luaV_gettable (lua_State *L, const TValue *t, TValue *key, StkId val) {
   int loop;
   for (loop = 0; loop < MAXTAGLOOP; loop++) {
@@ -136,20 +137,9 @@ void luaV_gettable (lua_State *L, const TValue *t, TValue *key, StkId val) {
   luaG_runerror(L, "loop in gettable");
 }
 
-
 void luaV_gettable_upvalue_fast (lua_State *L, const TValue *t, TValue *key, StkId val) {
-  lua_assert(ttistable(t));
-
-  if (ttype(key) != LUA_TSHRSTR) [[unlikely]] {
-    // fallback to slow path
-    return luaV_gettable(L, t, key, val);
-  }
-
-  // NOTE: this may have unexpected behavior if doing metatable shenanigans to
-  // the `_ENV`
-
   Table *h = hvalue(t);
-  const TValue *res = luaH_getstr(h, rawtsvalue(key));
+  const TValue *res = luaH_get(h, key);
 
   lua_assert(!ttisnil(res) ||  /* result is not nil? */
             (tm = fasttm(L, h->metatable, TM_INDEX)) == NULL);
@@ -198,34 +188,14 @@ void luaV_settable (lua_State *L, const TValue *t, TValue *key, StkId val) {
 
 
 void luaV_settable_upvalue_fast (lua_State *L, const TValue *t, TValue *key, StkId val) {
-  lua_assert(ttisvalue(t));
+  Table *h = hvalue(t);
+  TValue *res = cast(TValue *, luaH_get(h, key));
 
-  if (ttype(key) != LUA_TSHRSTR) [[unlikely]] {
-    // fallback to slow path
-    return luaV_settable(L, t, key, val);
+  if (ttisnil(res) || res == luaO_nilobject) [[unlikely]] {
+    res = luaH_newkey(L, h, key);
   }
 
-  Table *h = hvalue(t);
-  const TValue *res = luaH_getstr(h, rawtsvalue(key));
-
-  // NOTE: this may have unexpected behavior if doing metatable shenanigans to
-  // the `_ENV`
-
-  TValue *oldval = cast(TValue *, res);
-
-  [[maybe_unused]] bool lookup_or_insert_success = (!ttisnil(oldval) ||
-      /* previous value is nil; must check the metamethod */
-      // ((tm = fasttm(L, h->metatable, TM_NEWINDEX)) == NULL && // ... not: assume nothing done to the _ENV metatable
-      /* no metamethod; is there a previous entry in the table? */
-      (oldval != luaO_nilobject ||
-      /* no previous entry; must create one. (The next test is
-        always true; we only need the assignment.) */
-      (oldval = luaH_newkey(L, h, key), 1)));
-
-  lua_assert(lookup_or_insert_success);
-
-  setobj2t(L, oldval, val);  /* assign new value to that entry */
-  // invalidateTMcache(h); // we assume nothing may have been done to the metatable of the _ENV
+  setobj2t(L, res, val);
   luaC_barrierback(L, obj2gco(h), val);
 }
 
@@ -995,3 +965,4 @@ void luaV_execute (lua_State *L) {
     )
 }
 
+#include "ltable.c"

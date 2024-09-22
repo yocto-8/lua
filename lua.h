@@ -141,8 +141,6 @@ LUA_API const lua_Number *(lua_version) (lua_State *L);
 /*
 ** basic stack manipulation
 */
-typedef struct lua_TValue TValue;
-LUA_API TValue* (index2addr) (lua_State *L, int idx); // yocto-8: hacked in here for more efficient bindings and easier metatable handling
 LUA_API int   (lua_absindex) (lua_State *L, int idx);
 LUA_API int   (lua_gettop) (lua_State *L);
 LUA_API void  (lua_settop) (lua_State *L, int idx);

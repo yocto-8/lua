@@ -33,15 +33,8 @@ const char lua_ident[] =
   "$LuaVersion: " LUA_COPYRIGHT " $"
   "$LuaAuthors: " LUA_AUTHORS " $";
 
-
-/* value at a non-valid index */
-#define NONVALIDVALUE		cast(TValue *, luaO_nilobject)
-
 /* corresponding test */
 #define isvalid(o)	((o) != luaO_nilobject)
-
-/* test for pseudo index */
-#define ispseudo(i)		((i) <= LUA_REGISTRYINDEX)
 
 /* test for valid but not pseudo index */
 #define isstackindex(i, o)	(isvalid(o) && !ispseudo(i))
@@ -50,33 +43,6 @@ const char lua_ident[] =
 
 #define api_checkstackindex(L, i, o)  \
 	api_check(L, isstackindex(i, o), "index not in the stack")
-
-
-TValue *index2addr (lua_State *L, int idx) {
-  CallInfo *ci = L->ci;
-  if (idx > 0) {
-    TValue *o = ci->func + idx;
-    api_check(L, idx <= ci->top - (ci->func + 1), "unacceptable index");
-    if (o >= L->top) return NONVALIDVALUE;
-    else return o;
-  }
-  else if (!ispseudo(idx)) {  /* negative index */
-    api_check(L, idx != 0 && -idx <= L->top - (ci->func + 1), "invalid index");
-    return L->top + idx;
-  }
-  else if (idx == LUA_REGISTRYINDEX)
-    return &G(L)->l_registry;
-  else {  /* upvalues */
-    idx = LUA_REGISTRYINDEX - idx;
-    api_check(L, idx <= MAXUPVAL + 1, "upvalue index too large");
-    if (ttislcf(ci->func))  /* light C function? */
-      return NONVALIDVALUE;  /* it has no upvalues */
-    else {
-      CClosure *func = clCvalue(ci->func);
-      return (idx <= func->nupvalues) ? &func->upvalue[idx-1] : NONVALIDVALUE;
-    }
-  }
-}
 
 
 /*

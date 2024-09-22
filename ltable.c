@@ -445,7 +445,7 @@ TValue *luaH_newkey (lua_State *L, Table *t, const TValue *key) {
 */
 const TValue *luaH_getint (Table *t, int key) {
   /* (1 <= key && key <= t->sizearray) */
-  if (cast(unsigned int, key-1) < cast(unsigned int, t->sizearray))
+  if (cast(unsigned int, key-1) < cast(unsigned int, t->sizearray)) [[likely]]
     return &t->array[key-1];
   else {
     lua_Number nk = cast_num(key);
