@@ -471,6 +471,15 @@ void *y8_lua_realloc(void *ud, void *ptr, size_t osize, size_t nsize, bool must_
 #define luai_numlt(L,a,b)	((lua_Number)(a)<(lua_Number)(b))
 #define luai_numle(L,a,b)	((lua_Number)(a)<=(lua_Number)(b))
 #define luai_numisnan(L,a)	(!luai_numeq((lua_Number)(a), (lua_Number)(a)))
+#define luai_numbor(L,a,b)	((lua_Number)(a) | (lua_Number)(b))
+#define luai_numband(L,a,b) ((lua_Number)(a) & (lua_Number)(b))
+#define luai_numbxor(L,a,b) ((lua_Number)(a) ^ (lua_Number)(b))
+#define luai_numbnot(L,a)	(~(lua_Number)(a))
+#define luai_numblshift(L,a,b) ((lua_Number)(a) << (lua_Number)(b))
+#define luai_numbrshift(L,a,b) ((lua_Number)(a).unsigned_right_shift((lua_Number)(b)))
+#define luai_numarshift(L,a,b) ((lua_Number)(a) >> (lua_Number)(b))
+#define luai_numblrot(L,a,b) ((lua_Number)(a).rotate_left((lua_Number)(b)))
+#define luai_numbrrot(L,a,b) ((lua_Number)(a).rotate_right((lua_Number)(b)))
 #endif
 
 

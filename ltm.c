@@ -34,7 +34,10 @@ void luaT_init (lua_State *L) {
     "__index", "__newindex",
     "__gc", "__mode", "__len", "__eq",
     "__add", "__sub", "__mul", "__div", "__idiv", "__mod",
-    "__pow", "__unm", "__lt", "__le",
+    "__pow", "__unm",
+    "__or", "__and", "__xor", "__not", "__shl", "__lshr",
+    "__shr", "__rotl", "__rotr",
+    "__lt", "__le",
     "__concat", "__call"
   };
   int i;

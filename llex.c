@@ -36,7 +36,9 @@
 static const char *const luaX_tokens [] = {
     "and", "break", "do", "else", "elseif",
     "end", "false", "for", "function", "goto", "if",
-    "in", "local", "nil", "not", "or", "repeat",
+    "in", "local", "nil", "not",
+    "^^", "<<", ">>>", ">>", "<<>", ">><",
+    "or", "repeat",
     "return", "then", "true", "until", "while",
     "\\", "..", "...", "==", ">=", "<=", "~=", "!=", "::", "<eof>",
     "<number>", "<name>", "<string>", "?", "<eol>"
@@ -475,17 +477,42 @@ static int llex (LexState *ls, SemInfo *seminfo) {
       }
       case '<': {
         next(ls);
+        if (ls->current == '<') {
+          next(ls);
+          if (ls->current == '>') {
+            next(ls);
+            return TK_BLROT;
+          }
+          return TK_BLSHIFT;
+        }
         if (ls->current != '=') return '<';
         else { next(ls); return TK_LE; }
       }
       case '>': {
         next(ls);
+        if (ls->current == '>') {
+          next(ls);
+          if (ls->current == '>') {
+            next(ls);
+            return TK_BRSHIFT;
+          }
+          if (ls->current == '<') {
+            next(ls);
+            return TK_BRROT;
+          }
+          return TK_ARSHIFT;
+        }
         if (ls->current != '=') return '>';
         else { next(ls); return TK_GE; }
       }
+      case '^': {
+        next(ls);
+        if (ls->current != '^') { return '^'; }
+        else { next(ls); return TK_BXOR; }
+      }
       case '~': {
         next(ls);
-        if (ls->current != '=') return '~';
+        if (ls->current != '=') { return TK_BXOR; }
         else { next(ls); return TK_NE; }
       }
       case '!': {

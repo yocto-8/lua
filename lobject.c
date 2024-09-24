@@ -76,9 +76,19 @@ lua_Number luaO_arith (int op, lua_Number v1, lua_Number v2) {
     case LUA_OPSUB: return luai_numsub(NULL, v1, v2);
     case LUA_OPMUL: return luai_nummul(NULL, v1, v2);
     case LUA_OPDIV: return luai_numdiv(NULL, v1, v2);
+    case LUA_OPIDIV: return luai_numidiv(NULL, v1, v2);
     case LUA_OPMOD: return luai_nummod(NULL, v1, v2);
     case LUA_OPPOW: return luai_numpow(NULL, v1, v2);
     case LUA_OPUNM: return luai_numunm(NULL, v1);
+    case LUA_OPBOR: return luai_numbor(NULL, v1, v2);
+    case LUA_OPBAND: return luai_numband(NULL, v1, v2);
+    case LUA_OPBXOR: return luai_numbxor(NULL, v1, v2);
+    case LUA_OPBNOT: return luai_numbnot(NULL, v1);
+    case LUA_OPBLSHIFT: return luai_numblshift(NULL, v1, v2);
+    case LUA_OPBRSHIFT: return luai_numbrshift(NULL, v1, v2);
+    case LUA_OPARSHIFT: return luai_numarshift(NULL, v1, v2);
+    case LUA_OPBLROT: return luai_numblrot(NULL, v1, v2);
+    case LUA_OPBRROT: return luai_numbrrot(NULL, v1, v2);
     default: lua_assert(0); return 0;
   }
 }

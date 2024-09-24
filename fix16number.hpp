@@ -1,6 +1,8 @@
 #include <fix16.h>
 
+#include <bit>
 #include <compare>
+#include <cstdio>
 #include <type_traits>
 
 #define LUAFIX16_FN_ATTR [[gnu::always_inline, gnu::flatten]]
@@ -58,6 +60,43 @@ class LuaFix16 {
 		LUAFIX16_FN_ATTR const LuaFix16 operator%(const LuaFix16 &other) const  { LuaFix16 ret = *this; ret %= other; return ret; }
 
 		LUAFIX16_FN_ATTR auto operator<=>(const LuaFix16& other) const = default;
+
+		LUAFIX16_FN_ATTR const LuaFix16 operator|(const LuaFix16 &other) const { LuaFix16 ret = *this; ret.value |= other.value; return ret; }
+		LUAFIX16_FN_ATTR const LuaFix16 operator&(const LuaFix16 &other) const { LuaFix16 ret = *this; ret.value &= other.value; return ret; }
+		LUAFIX16_FN_ATTR const LuaFix16 operator^(const LuaFix16 &other) const { LuaFix16 ret = *this; ret.value ^= other.value; return ret; }
+		LUAFIX16_FN_ATTR const LuaFix16 operator~() const { LuaFix16 ret = *this; ret.value = ~ret.value; return ret; }
+		LUAFIX16_FN_ATTR const LuaFix16 operator<<(const LuaFix16 &other) const {
+			const int shift_amount = int(other);
+			LuaFix16 ret = *this;
+			ret.value = (
+				shift_amount >= 0
+				? ret.value << shift_amount
+				: int(unsigned(ret.value) >> unsigned(-shift_amount))
+			);
+			return ret;
+		}
+		LUAFIX16_FN_ATTR const LuaFix16 unsigned_right_shift(const LuaFix16 &other) const {
+			const int shift_amount = int(other);
+			LuaFix16 ret = *this;
+			ret.value = (
+				shift_amount >= 0
+				? int(unsigned(ret.value) >> unsigned(shift_amount))
+				: ret.value << -shift_amount
+			);
+			return ret;
+		}
+		LUAFIX16_FN_ATTR const LuaFix16 operator>>(const LuaFix16 &other) const {
+			const int shift_amount = int(other);
+			LuaFix16 ret = *this;
+			ret.value = (
+				shift_amount >= 0
+				? ret.value >> shift_amount
+				: ret.value << -shift_amount
+			);
+			return ret;
+		}
+		LUAFIX16_FN_ATTR const LuaFix16 rotate_left(const LuaFix16 &other) const { LuaFix16 ret = *this; ret.value = int32_t(std::rotl(uint32_t(ret.value), int(other))); return ret; }
+		LUAFIX16_FN_ATTR const LuaFix16 rotate_right(const LuaFix16 &other) const { LuaFix16 ret = *this; ret.value = int32_t(std::rotr(uint32_t(ret.value), int(other))); return ret; }
 
 		// FIXME: method vs public function should be normalized into one thing
 

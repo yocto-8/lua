@@ -989,6 +989,7 @@ static UnOpr getunopr (int op) {
   switch (op) {
     case TK_NOT: return OPR_NOT;
     case '-': return OPR_MINUS;
+    case '~': return OPR_BNOT;
     case '#': return OPR_LEN;
     default: return OPR_NOUNOPR;
   }
@@ -1004,6 +1005,14 @@ static BinOpr getbinopr (int op) {
     case TK_IDIV: return OPR_IDIV;
     case '%': return OPR_MOD;
     case '^': return OPR_POW;
+    case '&': return OPR_BAND;
+    case '|': return OPR_BOR;
+    case TK_BXOR: return OPR_BXOR;
+    case TK_BLSHIFT: return OPR_BLSHIFT;
+    case TK_BRSHIFT: return OPR_BRSHIFT;
+    case TK_ARSHIFT: return OPR_ARSHIFT;
+    case TK_BLROT: return OPR_BLROT;
+    case TK_BRROT: return OPR_BRROT;
     case TK_CONCAT: return OPR_CONCAT;
     case TK_NE: return OPR_NE;
     case TK_EQ: return OPR_EQ;
@@ -1017,14 +1026,15 @@ static BinOpr getbinopr (int op) {
   }
 }
 
-
 static const struct {
   lu_byte left;  /* left priority for each binary operator */
   lu_byte right; /* right priority */
 } priority[] = {  /* ORDER OPR */
-   {6, 6}, {6, 6},  /* '+' '-' */
-   {7, 7}, {7, 7}, {7, 7}, {7, 7},  /* '*' '/' '\' '%' */
-   {10, 9}, {5, 4},                 /* ^, .. (right associative) */
+   {10, 10}, {10, 10},  /* '+' '-' */
+   {11, 11}, {11, 11}, {11, 11}, {11, 11},  /* '*' '/' '\' '%' */
+   {10, 9}, /* '^' */
+   {4, 4}, {6, 6}, {5, 5}, {7, 7}, {7, 7}, {7, 7}, {7, 7}, {7, 7}, /* '|' '&' '^' '<<' '>>>' '>>' '<<>' '>><' */
+   {9, 8}, /* .. (right associative) */
    {3, 3}, {3, 3}, {3, 3},          /* ==, <, <= */
    {3, 3}, {3, 3}, {3, 3},          /* ~=, >, >= */
    {2, 2}, {1, 1}                   /* and, or */

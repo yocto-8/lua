@@ -617,7 +617,16 @@ void luaV_execute (lua_State *L) {
     &&OP_IDIV,/*	A B C	R(A) := RK(B) \ RK(C)				*/
     &&OP_MOD,/*	A B C	R(A) := RK(B) % RK(C)				*/
     &&OP_POW,/*	A B C	R(A) := RK(B) ^ RK(C)				*/
+    &&OP_BOR,/*	A B C	R(A) := RK(B) | RK(C)				*/
+    &&OP_BAND,/*	A B C	R(A) := RK(B) & RK(C)				*/
+    &&OP_BXOR,/*	A B C	R(A) := RK(B) ^ RK(C)				*/
+    &&OP_BLSHIFT,/*	A B C	R(A) := RK(B) << RK(C)				*/
+    &&OP_BRSHIFT,/*	A B C	R(A) := RK(B) >>> RK(C)				*/
+    &&OP_ARSHIFT,/*	A B C	R(A) := RK(B) >> RK(C)				*/
+    &&OP_BLROT,/*	A B C	R(A) := RK(B) rotl RK(C)				*/
+    &&OP_BRROT,/*	A B C	R(A) := RK(B) rotr RK(C)				*/
     &&OP_UNM,/*	A B	R(A) := -R(B)					*/
+    &&OP_BNOT,/*	A B	R(A) := ~R(B)					*/
     &&OP_NOT,/*	A B	R(A) := not R(B)				*/
     &&OP_LEN,/*	A B	R(A) := length of R(B)				*/
 
@@ -733,6 +742,30 @@ void luaV_execute (lua_State *L) {
     vmcase(OP_POW,
       arith_op(luai_numpow, TM_POW);
     )
+    vmcase(OP_BOR,
+      arith_op(luai_numbor, TM_BOR);
+    )
+    vmcase(OP_BAND,
+      arith_op(luai_numband, TM_BAND);
+    )
+    vmcase(OP_BXOR,
+      arith_op(luai_numbxor, TM_BXOR);
+    )
+    vmcase(OP_BLSHIFT,
+      arith_op(luai_numblshift, TM_BLSHIFT);
+    )
+    vmcase(OP_BRSHIFT,
+      arith_op(luai_numbrshift, TM_BRSHIFT);
+    )
+    vmcase(OP_ARSHIFT,
+      arith_op(luai_numarshift, TM_ARSHIFT);
+    )
+    vmcase(OP_BLROT,
+      arith_op(luai_numblrot, TM_BLROT);
+    )
+    vmcase(OP_BRROT,
+      arith_op(luai_numbrrot, TM_BRROT);
+    )
     vmcase(OP_UNM,
       TValue *rb = RB(i);
       if (ttisnumber(rb)) {
@@ -741,6 +774,16 @@ void luaV_execute (lua_State *L) {
       }
       else {
         Protect(luaV_arith(L, ra, rb, rb, TM_UNM));
+      }
+    )
+    vmcase(OP_BNOT,
+      TValue *rb = RB(i);
+      if (ttisnumber(rb)) {
+        lua_Number nb = nvalue(rb);
+        setnvalue(ra, luai_numbnot(L, nb));
+      }
+      else {
+        Protect(luaV_arith(L, ra, rb, rb, TM_BNOT));
       }
     )
     vmcase(OP_NOT,
