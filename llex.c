@@ -512,7 +512,7 @@ static int llex (LexState *ls, SemInfo *seminfo) {
       }
       case '~': {
         next(ls);
-        if (ls->current != '=') { return TK_BXOR; }
+        if (ls->current != '=') { return '~'; }
         else { next(ls); return TK_NE; }
       }
       case '!': {
