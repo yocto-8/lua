@@ -145,6 +145,7 @@ typedef struct global_State {
   TString *memerrmsg;  /* memory-error message */
   TString *tmname[TM_N];  /* array with tag-method names */
   struct Table *mt[LUA_NUMTAGS];  /* metatables for basic types */
+  uint8_t *y8_mem;  /* yocto-8 memory, a flat 64KiB buffer */
 } global_State;
 
 
