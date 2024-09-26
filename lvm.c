@@ -454,6 +454,7 @@ void luaV_finishOp (lua_State *L) {
   Instruction inst = *(ci->u.l.savedpc - 1);  /* interrupted instruction */
   OpCode op = GET_OPCODE(inst);
   switch (op) {  /* finish its execution */
+    #warning fixme: finishOp stuff here for y8 (all bitwise + peek)
     case OP_ADD: case OP_SUB: case OP_MUL: case OP_DIV: case OP_IDIV:
     case OP_MOD: case OP_POW: case OP_UNM: case OP_LEN:
     case OP_GETTABUP: case OP_GETTABLE: case OP_SELF: {
@@ -628,6 +629,9 @@ void luaV_execute (lua_State *L) {
     &&OP_UNM,/*	A B	R(A) := -R(B)					*/
     &&OP_BNOT,/*	A B	R(A) := ~R(B)					*/
     &&OP_NOT,/*	A B	R(A) := not R(B)				*/
+    &&OP_PEEK,
+    &&OP_PEEK2,
+    &&OP_PEEK4,
     &&OP_LEN,/*	A B	R(A) := length of R(B)				*/
 
     &&OP_CONCAT,/*	A B C	R(A) := R(B).. ... ..R(C)			*/
@@ -790,6 +794,46 @@ void luaV_execute (lua_State *L) {
       TValue *rb = RB(i);
       int res = l_isfalse(rb);  /* next assignment may change this value */
       setbvalue(ra, res);
+    )
+    vmcase(OP_PEEK,
+      TValue *rb = RB(i);
+      if (ttisnumber(rb)) {
+        const uint16_t addr = uint16_t(nvalue(rb)); // already %65536
+        uint8_t *mem = G(L)->y8_mem;
+        uint8_t value = mem[addr];
+        setnvalue(ra, LuaFix16(value));
+      }
+      else {
+        Protect(luaV_arith(L, ra, rb, rb, TM_PEEK));
+      }
+    )
+    vmcase(OP_PEEK2,
+      TValue *rb = RB(i);
+      if (ttisnumber(rb)) {
+        const uint16_t addr = uint16_t(nvalue(rb));
+        uint8_t *mem = G(L)->y8_mem;
+        uint16_t value = (mem[(addr + 0) % 65536] << 0
+                        | mem[(addr + 1) % 65536] << 8);
+        setnvalue(ra, LuaFix16(value));
+      }
+      else {
+        Protect(luaV_arith(L, ra, rb, rb, TM_PEEK));
+      }
+    )
+    vmcase(OP_PEEK4,
+      TValue *rb = RB(i);
+      if (ttisnumber(rb)) {
+        const uint16_t addr = uint16_t(nvalue(rb));
+        uint8_t *mem = G(L)->y8_mem;
+        uint32_t value = (mem[(addr + 0) % 65536] << 0
+                        | mem[(addr + 1) % 65536] << 8
+                        | mem[(addr + 2) % 65536] << 16
+                        | mem[(addr + 3) % 65536] << 24);
+        setnvalue(ra, LuaFix16::from_fix16(value));
+      }
+      else {
+        Protect(luaV_arith(L, ra, rb, rb, TM_PEEK));
+      }
     )
     vmcase(OP_LEN,
       Protect(luaV_objlen(L, ra, RB(i)));

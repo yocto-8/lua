@@ -478,6 +478,7 @@ static const char *getfuncname (lua_State *L, CallInfo *ci, const char **name) {
     case OP_GETTABLE: tm = TM_INDEX; break;
     case OP_SETTABUP:
     case OP_SETTABLE: tm = TM_NEWINDEX; break;
+    #warning fixme: metatable stuff here for y8
     case OP_EQ: tm = TM_EQ; break;
     case OP_ADD: tm = TM_ADD; break;
     case OP_SUB: tm = TM_SUB; break;

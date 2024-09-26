@@ -202,6 +202,9 @@ OP_BRROT,/*	A B C	R(A) := RK(B) rotr RK(C)				*/
 OP_UNM,/*	A B	R(A) := -R(B)					*/
 OP_BNOT,/*	A B	R(A) := ~R(B)					*/
 OP_NOT,/*	A B	R(A) := not R(B)				*/
+OP_PEEK,/*	A B	R(A) := peek(R(B))				*/
+OP_PEEK2,/*	A B	R(A) := peek2(R(B))				*/
+OP_PEEK4,/*	A B	R(A) := peek4(R(B))				*/
 OP_LEN,/*	A B	R(A) := length of R(B)				*/
 
 OP_CONCAT,/*	A B C	R(A) := R(B).. ... ..R(C)			*/

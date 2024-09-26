@@ -787,6 +787,13 @@ void luaK_prefix (FuncState *fs, UnOpr op, expdesc *e, int line) {
       codearith(fs, OP_LEN, e, &e2, line);
       break;
     }
+    case OPR_PEEK:
+    case OPR_PEEK2:
+    case OPR_PEEK4: {
+      luaK_exp2anyreg(fs, e);
+      codearith(fs, OpCode(OP_PEEK + int(op - OPR_PEEK)), e, &e2, line);
+      break;
+    }
     default: lua_assert(0);
   }
 }
