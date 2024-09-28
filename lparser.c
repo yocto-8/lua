@@ -1043,7 +1043,7 @@ static const struct {
    {2, 2}, {1, 1}                   /* and, or */
 };
 
-#define UNARY_PRIORITY	8  /* priority for unary operators */
+#define UNARY_PRIORITY	12  /* priority for unary operators */
 
 
 /*
