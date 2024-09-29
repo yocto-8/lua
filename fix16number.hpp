@@ -58,6 +58,15 @@ class LuaFix16 {
 		LUAFIX16_FN_ATTR const LuaFix16 operator*(const LuaFix16 &other) const  { LuaFix16 ret = *this; ret *= other; return ret; }
 		LUAFIX16_FN_ATTR const LuaFix16 operator/(const LuaFix16 &other) const  { LuaFix16 ret = *this; ret /= other; return ret; }
 		LUAFIX16_FN_ATTR const LuaFix16 operator%(const LuaFix16 &other) const  { LuaFix16 ret = *this; ret %= other; return ret; }
+		LUAFIX16_FN_ATTR const LuaFix16 int_division(const LuaFix16 &other) const {
+			if (other.value == 0) {
+				return LuaFix16((value >= 0) ? 32767 : -32768);
+			}
+
+			// numidiv here is correct as the division cancels out the multiplication factor
+			// of a and b, and the output type is int
+			return LuaFix16::from_fix16(this->value / other.value);
+		}
 
 		LUAFIX16_FN_ATTR auto operator<=>(const LuaFix16& other) const = default;
 
