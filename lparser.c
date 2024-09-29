@@ -1195,21 +1195,6 @@ static int compound_assignment(LexState *ls, struct LHS_assign *lh, int nvars) {
        adjustlocalvars(ls,nextra);
      }   
   }
-  if(op==OPR_ADD && testnext(ls,'+')) {
-    /* the increment case.  supporting this is a bit silly, but
-    ** also fairly simple.
-    ** note that `a,b,c++` increments a,b, and c. */
-    for(i=0;i<nvars;i++) {
-      init_exp(&e, VKNUM, 0);
-      e.u.nval = 1;
-      infix=assign->v;
-      luaK_infix(fs,op,&infix);
-      luaK_posfix(fs, op, &infix, &e, line);
-      luaK_storevar(fs, &assign->v, &infix);
-      assign=assign->next;
-    }
-    goto done;
-  }
   checknext(ls, '=');
   do {
     if(!assign) {
