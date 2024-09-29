@@ -1277,7 +1277,9 @@ static int assignment (LexState *ls, struct LHS_assign *lh, int nvars) {
     int nexps;
     switch(ls->t.token) {
       /* hook for compound_assignment */
-      case '+': case '-': case '*': case '/': case TK_CONCAT:
+      case '+': case '-': case '*': case '/': case TK_IDIV: case TK_CONCAT:
+      case TK_BXOR: case '|': case '&': case TK_BLSHIFT: case TK_BRSHIFT:
+      case TK_ARSHIFT: case TK_BLROT: case TK_BRROT:
         return compound_assignment(ls,lh,nvars);
     }
     checknext(ls, '=');
