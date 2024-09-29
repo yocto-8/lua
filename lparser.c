@@ -1161,7 +1161,6 @@ static int compound_assignment(LexState *ls, struct LHS_assign *lh, int nvars) {
   int old_free=fs->freereg;
   expdesc e,infix;
   // double inc=0;
-  int nexps=0,i;
   int line=ls->linenumber;
   struct LHS_assign * assign=lh;
   while(assign->prev) assign=assign->prev;
@@ -1171,70 +1170,36 @@ static int compound_assignment(LexState *ls, struct LHS_assign *lh, int nvars) {
        by VINDEXED lvalues. */
      lu_byte top=fs->nactvar;
      struct LHS_assign * a = lh;
-     int nextra;
-     while(a) {
-       expdesc * v= &a->v;
-       /* protect both the table and index result registers,
-       ** ensuring that they won't be overwritten prior to the 
-       ** storevar calls. */
-       if(v->k==VINDEXED) {
-         if( !ISK( v->u.ind.t ) && v->u.ind.t  >= top) {
-           top= v->u.ind.t+1;
-         }
-         if( !ISK( v->u.ind.idx ) && v->u.ind.idx >= top) {
-           top= v->u.ind.idx+1;
-         }
+  
+     expdesc * v= &a->v;
+     /* protect both the table and index result registers,
+     ** ensuring that they won't be overwritten prior to the 
+     ** storevar calls. */
+     if(v->k==VINDEXED) {
+       if( !ISK( v->u.ind.t ) && v->u.ind.t  >= top) {
+         top= v->u.ind.t+1;
        }
-       a=a->prev;
+       if( !ISK( v->u.ind.idx ) && v->u.ind.idx >= top) {
+         top= v->u.ind.idx+1;
+       }
      }
-     nextra=top-fs->nactvar;
+
+     int nextra=top-fs->nactvar;
      if(nextra) {
-       for(i=0;i<nextra;i++) {
+       for(int i=0;i<nextra;i++) {
          new_localvarliteral(ls,"(temp)");
        }
        adjustlocalvars(ls,nextra);
-     }   
+     }
   }
   checknext(ls, '=');
-  do {
-    if(!assign) {
-      luaX_syntaxerror(ls,"too many right hand side values in compound assignment");
-    }
-    infix=assign->v;
-    luaK_infix(fs,op,&infix);
-    expr(ls, &e);
-    if(ls->t.token == ',') {
-      luaK_posfix(fs, op, &infix, &e, line);
-      luaK_storevar(fs, &assign->v, &infix);
-      assign=assign->next;
-      nexps++;
-    }
-  } while (testnext(ls, ','));
+  infix=assign->v;
+  luaK_infix(fs,op,&infix);
+  expr(ls, &e);
 
-  if(nexps+1==nvars ) {
-      luaK_posfix(fs, op, &infix, &e, line);
-      luaK_storevar(fs, &lh->v, &infix);
-  } else if( hasmultret(e.k) ) {
-    adjust_assign(ls, nvars-nexps, 1, &e);
-    assign=lh;
-    {
-      int top=ls->fs->freereg-1;
-      // int first_top=top;
-      for(i=0;i<nvars-nexps;i++) {
-        infix=assign->v;
-        luaK_infix(fs,op,&infix);
+  luaK_posfix(fs, op, &infix, &e, line);
+  luaK_storevar(fs, &lh->v, &infix);
 
-        init_exp(&e, VNONRELOC, top--); 
-        luaK_posfix(fs, op, &infix, &e, line);
-        luaK_storevar(fs, &assign->v, &infix);
-        assign=assign->prev;
-      }
-    }
-  } else {
-    luaX_syntaxerror(ls,"insufficient right hand variables in compound assignment.");
-  }
-
-  done:
   removevars(fs,tolevel);
   if(old_free<fs->freereg) {
     fs->freereg=old_free;
