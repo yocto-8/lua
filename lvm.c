@@ -520,9 +520,9 @@ void luaV_finishOp (lua_State *L) {
 #define RB(i)	check_exp(getBMode(GET_OPCODE(i)) == OpArgR, base+GETARG_B(i))
 #define RC(i)	check_exp(getCMode(GET_OPCODE(i)) == OpArgR, base+GETARG_C(i))
 #define RKB(i)	check_exp(getBMode(GET_OPCODE(i)) == OpArgK, \
-	ISK(GETARG_B(i)) ? k+INDEXK(GETARG_B(i)) : base+GETARG_B(i))
+  [&]{ TValue* value = base+GETARG_B(i); if (ISK(GETARG_B(i))) [[unlikely]] { value = k+INDEXK(GETARG_B(i)); } return value; }())
 #define RKC(i)	check_exp(getCMode(GET_OPCODE(i)) == OpArgK, \
-	ISK(GETARG_C(i)) ? k+INDEXK(GETARG_C(i)) : base+GETARG_C(i))
+  [&]{ TValue* value = base+GETARG_C(i); if (ISK(GETARG_C(i))) [[unlikely]] { value = k+INDEXK(GETARG_C(i)); } return value; }())
 #define KBx(i)  \
   (k + (GETARG_Bx(i) != 0 ? GETARG_Bx(i) - 1 : GETARG_Ax(*ci->u.l.savedpc++)))
 
