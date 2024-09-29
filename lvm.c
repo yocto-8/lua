@@ -557,31 +557,24 @@ void luaV_finishOp (lua_State *L) {
 
 #define vmdispatch() \
         i = *(ci->u.l.savedpc++); \
-        ra = RA(i); \
         lua_assert(base == ci->u.l.base); \
         lua_assert(base <= L->top && L->top < L->stack + L->stacksize); \
         goto *opcode_table[GET_OPCODE(i)];
 
-#define vmcase(l,b)	l: {b}  vmdispatch();
-#define vmcasenb(l,b)	l: {b}		/* nb = no break */
+#define vmcase(l,b)	l: {[[maybe_unused]] StkId ra = RA(i); {b}}  vmdispatch();
+#define vmcasenb(l,b)	l: {[[maybe_unused]] StkId ra = RA(i); b}		/* nb = no break */
 
 //#undef lua_assert
 //#define lua_assert(c) ((c) ? 0 : (__builtin_unreachable(), 0))
 //#define lua_assert(c) (([&]() __attribute__((flatten, always_inline)) { return (c); })() ? 0 : (__builtin_unreachable(), 0))
 
 void luaV_execute (lua_State *L) {
-  CallInfo *ci = L->ci;
-  LClosure *cl;
-  TValue *k;
-  StkId base;
- newframe:  /* reentry point when frame changes (call/return) */
-  lua_assert(ci == L->ci);
-  cl = clLvalue(ci->func);
-  k = cl->p->k;
-  base = ci->u.l.base;
+  CallInfo *const ci = L->ci;
+  LClosure *const cl = clLvalue(ci->func);
+  TValue *const k = cl->p->k;
+  StkId base = ci->u.l.base;
 
   Instruction i;
-  StkId ra;
 
 #ifdef Y8_LUA_ALLOW_HOOKMASKS
   if ((L->hookmask & (LUA_MASKLINE | LUA_MASKCOUNT)) &&
@@ -903,9 +896,8 @@ void luaV_execute (lua_State *L) {
         base = ci->u.l.base;
       }
       else {  /* Lua function */
-        ci = L->ci;
-        ci->callstatus |= CIST_REENTRY;
-        goto newframe;  /* restart luaV_execute over new Lua function */
+        L->ci->callstatus |= CIST_REENTRY;
+        [[clang::musttail]] return luaV_execute(L);  /* restart luaV_execute over new Lua function */
       }
     )
     vmcase(OP_TAILCALL,
@@ -932,9 +924,9 @@ void luaV_execute (lua_State *L) {
         oci->top = L->top = ofunc + (L->top - nfunc);  /* correct top */
         oci->u.l.savedpc = nci->u.l.savedpc;
         oci->callstatus |= CIST_TAIL;  /* function was tail called */
-        ci = L->ci = oci;  /* remove new frame */
+        L->ci = oci;  /* remove new frame */
         lua_assert(L->top == oci->u.l.base + getproto(ofunc)->maxstacksize);
-        goto newframe;  /* restart luaV_execute over new Lua function */
+        [[clang::musttail]] return luaV_execute(L);  /* restart luaV_execute over new Lua function */
       }
     )
     vmcasenb(OP_RETURN,
@@ -945,11 +937,10 @@ void luaV_execute (lua_State *L) {
       if (!(ci->callstatus & CIST_REENTRY))  /* 'ci' still the called one */
         return;  /* external invocation: return */
       else {  /* invocation via reentry: continue execution */
-        ci = L->ci;
-        if (b) L->top = ci->top;
-        lua_assert(isLua(ci));
-        lua_assert(GET_OPCODE(*((ci)->u.l.savedpc - 1)) == OP_CALL);
-        goto newframe;  /* restart luaV_execute over new Lua function */
+        if (b) L->top = L->ci->top;
+        lua_assert(isLua(L->ci));
+        lua_assert(GET_OPCODE(*(L->ci->u.l.savedpc - 1)) == OP_CALL);
+        [[clang::musttail]] return luaV_execute(L);  /* restart luaV_execute over new Lua function */
       }
     )
     vmcase(OP_FORLOOP,
@@ -976,7 +967,7 @@ void luaV_execute (lua_State *L) {
       setnvalue(ra, luai_numsub(L, nvalue(ra), nvalue(pstep)));
       ci->u.l.savedpc += GETARG_sBx(i);
     )
-    vmcasenb(OP_TFORCALL,
+    vmcase(OP_TFORCALL,
       StkId cb = ra + 3;  /* call base */
       setobjs2s(L, cb+2, ra+2);
       setobjs2s(L, cb+1, ra+1);
@@ -987,10 +978,12 @@ void luaV_execute (lua_State *L) {
       i = *(ci->u.l.savedpc++);  /* go to next instruction */
       ra = RA(i);
       lua_assert(GET_OPCODE(i) == OP_TFORLOOP);
-      goto l_tforloop;
+      if (!ttisnil(ra + 1)) {  /* continue loop? */
+        setobjs2s(L, ra, ra + 1);  /* save control variable */
+          ci->u.l.savedpc += GETARG_sBx(i);  /* jump back */
+      }
     )
     vmcase(OP_TFORLOOP,
-      l_tforloop:
       if (!ttisnil(ra + 1)) {  /* continue loop? */
         setobjs2s(L, ra, ra + 1);  /* save control variable */
           ci->u.l.savedpc += GETARG_sBx(i);  /* jump back */
