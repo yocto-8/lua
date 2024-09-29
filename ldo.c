@@ -253,6 +253,7 @@ void luaD_hook (lua_State *L, int event, int line) {
 }
 
 
+#ifdef Y8_LUA_ALLOW_HOOKMASKS
 LUA_FAST static void callhook (lua_State *L, CallInfo *ci) {
   int hook = LUA_HOOKCALL;
   ci->u.l.savedpc++;  /* hooks assume 'pc' is already incremented */
@@ -264,6 +265,7 @@ LUA_FAST static void callhook (lua_State *L, CallInfo *ci) {
   luaD_hook(L, hook, -1);
   ci->u.l.savedpc--;  /* correct 'pc' */
 }
+#endif
 
 
 LUA_FAST static StkId adjust_varargs (lua_State *L, Proto *p, int actual) {
