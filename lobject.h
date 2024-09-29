@@ -101,7 +101,7 @@ typedef union Value Value;
 ** an actual value plus a tag with its type.
 */
 
-#define TValuefields	Value value_; int tt_
+#define TValuefields	 Value value_; uint8_t tt_
 
 typedef struct lua_TValue TValue;
 
