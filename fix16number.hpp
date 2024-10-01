@@ -66,7 +66,7 @@ struct LuaFix16 {
 
 		// numidiv here is correct as the division cancels out the multiplication factor
 		// of a and b, and the output type is int
-		return LuaFix16::from_fix16(this->value / other.value);
+		return LuaFix16(this->value / other.value);
 	}
 
 	LUAFIX16_FN_ATTR auto operator<=>(const LuaFix16& other) const = default;
