@@ -33,10 +33,10 @@
 #define MAXTAGLOOP	100
 
 
-const TValue *luaV_tonumber (const TValue *obj, TValue *n) {
+const TValue *luaV_tonumber (const TValue *obj, TValue *n, int parse_mask) {
   lua_Number num;
   if (ttisnumber(obj)) return obj;
-  if (ttisstring(obj) && luaO_str2d(svalue(obj), tsvalue(obj)->len, &num)) {
+  if (ttisstring(obj) && luaO_str2d(svalue(obj), tsvalue(obj)->len, &num, parse_mask)) {
     setnvalue(n, num);
     return n;
   }

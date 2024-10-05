@@ -112,13 +112,13 @@ static int isneg (const char **s) {
 }
 
 
-static uint16_t readhexa (const char **s, int *count, bool is_decimal_part) {
-  uint16_t r = 0;
+static uint32_t readhexa (const char **s, int *count, bool is_decimal_part) {
+  uint32_t r = 0;
   for (; lisxdigit(cast_uchar(**s)); (*s)++) {  /* read integer part */
     int digit_value = luaO_hexavalue(cast_uchar(**s));
     if (is_decimal_part) {
       if (*count < 4) {
-        r |= uint16_t(digit_value << (12 - (*count) * 4));
+        r |= uint32_t(digit_value << (12 - (*count) * 4));
       }
     } else {
       r = (r << 4) | digit_value;
@@ -133,7 +133,7 @@ static uint16_t readhexa (const char **s, int *count, bool is_decimal_part) {
 ** convert an hexadecimal numeric string to a number, following
 ** C99 specification for 'strtod'
 */
-static lua_Number lua_strx2number (const char *s, char **endptr) {
+static lua_Number lua_strx2number (const char *s, char **endptr, int parse_mask) {
   /* yocto-8 modified: numbers are fixed-point */
   /* yocto-8 modified: `p` was removed from this parsing */
   static_assert(std::is_same_v<lua_Number, LuaFix16>);
@@ -143,11 +143,13 @@ static lua_Number lua_strx2number (const char *s, char **endptr) {
   *endptr = cast(char *, s);  /* nothing is valid yet */
   while (lisspace(cast_uchar(*s))) s++;  /* skip initial spaces */
   neg = isneg(&s);  /* check signal */
-  if (!(*s == '0' && (*(s + 1) == 'x' || *(s + 1) == 'X')))  /* check '0x' */
-    return 0.0;  /* invalid format (no '0x') */
-  s += 2;  /* skip '0x' */
-  uint16_t int_part = readhexa(&s, &i, false);  /* read integer part */
-  uint16_t decimal_part = 0;
+  if ((parse_mask & LPARSE_HEX) == 0) {
+    if (!(*s == '0' && (*(s + 1) == 'x' || *(s + 1) == 'X')))  /* check '0x' */
+      return 0.0;  /* invalid format (no '0x') */
+    s += 2;  /* skip '0x' */
+  }
+  uint32_t int_part = readhexa(&s, &i, false);  /* read integer part */
+  uint32_t decimal_part = 0;
   if (*s == '.') {
     s++;  /* skip dot */
     decimal_part = readhexa(&s, &d, true);  /* read fractional part */
@@ -155,14 +157,20 @@ static lua_Number lua_strx2number (const char *s, char **endptr) {
   if (i == 0 && d == 0)
     return 0.0;  /* invalid format (no digit) */
   *endptr = cast(char *, s);  /* valid up to here */
-  lua_Number r(int16_t(int_part), decimal_part);
+
+  lua_Number r;
+  if ((parse_mask & LPARSE_SHIFT) != 0) {
+    r = lua_Number::from_fix16(int_part);
+  } else {
+    r = lua_Number(int16_t(int_part), decimal_part);
+  }
   if (neg) r = -r;
   return r;
 }
 
 #endif
 
-static lua_Number lua_strb2number (const char *s, char **endptr) {
+static lua_Number lua_strb2number (const char *s, char **endptr, int parse_mask) {
   /* yocto-8 modified: accept decimal values */
 
   uint32_t r = 0;
@@ -182,13 +190,17 @@ static lua_Number lua_strb2number (const char *s, char **endptr) {
   if (int_digits == 0)
     return 0.0;  /* invalid format */
 
-  r <<= 16;
+  if ((parse_mask & LPARSE_SHIFT) == 0) {
+    r <<= 16;
+  }
   if (*s == '.') { /* decimal part */
     s += 1; /* skip dot */
     while ((*s == '0') || (*s == '1'))
     {
-      if (decimal_digits < 16) {
-        if (*s == '1') r |= 1 << (15 - decimal_digits);
+      if ((parse_mask & LPARSE_SHIFT) == 0) {
+        if (decimal_digits < 16) {
+          if (*s == '1') r |= 1 << (15 - decimal_digits);
+        }
       }
       decimal_digits++; s++;
     }
@@ -197,16 +209,14 @@ static lua_Number lua_strb2number (const char *s, char **endptr) {
   return lua_Number::from_fix16(int(r));
 }
 
-int luaO_str2d (const char *s, size_t len, lua_Number *result) {
+int luaO_str2d (const char *s, size_t len, lua_Number *result, int mask) {
   char *endptr;
-  if (strpbrk(s, "nN"))  /* reject 'inf' and 'nan' */
-    return 0;
-  else if (strpbrk(s, "xX"))  /* hexa? */
-    *result = lua_strx2number(s, &endptr);
+  if (strpbrk(s, "xX") || (mask & LPARSE_HEX) != 0)  /* hexa? */
+    *result = lua_strx2number(s, &endptr, mask);
   else if (strpbrk(s, "bB")) /* bina? */
-    *result = lua_strb2number(s, &endptr);
+    *result = lua_strb2number(s, &endptr, mask);
   else
-    *result = lua_str2number(s, &endptr);
+    *result = lua_str2number(s, &endptr, mask);
   if (endptr == s) return 0;  /* nothing recognized */
   while (lisspace(cast_uchar(*endptr))) endptr++;
   return (endptr == s + len);  /* OK if no trailing characters */

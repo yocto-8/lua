@@ -434,11 +434,7 @@ void *y8_lua_realloc(void *ud, void *ptr, size_t osize, size_t nsize, bool must_
 ** provide its own implementation.
 */
 // #define lua_str2number(s,p)	strtod((s), (p))
-#define lua_str2number(s,p)	LuaFix16::from_fix16(strtofix16((s), (p)))
-
-#if defined(LUA_USE_STRTODHEX)
-#define lua_strx2number(s,p)	strtod((s), (p))
-#endif
+#define lua_str2number(s,p,mask)	LuaFix16::from_fix16(strtofix16((s), (p), (mask)))
 
 
 /*

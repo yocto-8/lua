@@ -298,10 +298,10 @@ LUA_API int lua_compare (lua_State *L, int index1, int index2, int op) {
 }
 
 
-LUA_API lua_Number lua_tonumberx (lua_State *L, int idx, int *isnum) {
+LUA_API lua_Number lua_tonumberx (lua_State *L, int idx, int *isnum, int parse_mask) {
   TValue n;
   const TValue *o = index2addr(L, idx);
-  if (tonumber(o, &n)) {
+  if (tonumbermasked(o, &n, parse_mask)) {
     if (isnum) *isnum = 1;
     return nvalue(o);
   }
