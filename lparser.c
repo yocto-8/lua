@@ -1035,7 +1035,7 @@ static const struct {
 } priority[] = {  /* ORDER OPR */
    {10, 10}, {10, 10},  /* '+' '-' */
    {11, 11}, {11, 11}, {11, 11}, {11, 11},  /* '*' '/' '\' '%' */
-   {10, 9}, /* '^' */
+   {13, 12}, /* '^' */
    {4, 4}, {6, 6}, {5, 5}, {7, 7}, {7, 7}, {7, 7}, {7, 7}, {7, 7}, /* '|' '&' '^' '<<' '>>>' '>>' '<<>' '>><' */
    {9, 8}, /* .. (right associative) */
    {3, 3}, {3, 3}, {3, 3},          /* ==, <, <= */
@@ -1043,7 +1043,7 @@ static const struct {
    {2, 2}, {1, 1}                   /* and, or */
 };
 
-#define UNARY_PRIORITY	12  /* priority for unary operators */
+#define UNARY_PRIORITY	14  /* priority for unary operators */
 
 
 /*
