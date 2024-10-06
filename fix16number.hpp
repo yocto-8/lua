@@ -142,5 +142,10 @@ inline LuaFix16 sin(LuaFix16 x) { return x.sin(); }
 inline LuaFix16 floor(LuaFix16 x) { return LuaFix16::from_fix16(fix16_floor(x.value)); }
 inline LuaFix16 exp(LuaFix16 x) { return LuaFix16::from_fix16(fix16_exp(x.value)); }
 inline LuaFix16 log(LuaFix16 x) { return LuaFix16::from_fix16(fix16_log(x.value)); }
-inline LuaFix16 pow(LuaFix16 x, LuaFix16 y) { return exp(log(x) * y); }
+inline LuaFix16 pow(LuaFix16 x, LuaFix16 y) {
+	// hacky, not fully correct approximation to pow that accepts negative x
+	auto ret = exp(log(fabs(x)) * y);
+	ret.value = (x < 0 && y < 0) ? -ret.value : ret.value; // restore sign
+	return ret;
+}
 inline LuaFix16 ldexp(LuaFix16 x, int exp) { return x * pow(LuaFix16(2), exp); }

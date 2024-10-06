@@ -444,7 +444,7 @@ void *y8_lua_realloc(void *ud, void *ptr, size_t osize, size_t nsize, bool must_
 // TODO: luai_numpow as proper fixed point
 #define luai_numidiv(L,a,b) ((lua_Number)(a).int_division((lua_Number)(b)))
 #define luai_nummod(L,a,b) ((lua_Number)(a)%(lua_Number)(b))
-#define luai_numpow(L,a,b) ((lua_Number)pow(double(a), double(b)))
+#define luai_numpow(L,a,b) pow((lua_Number)(a), (lua_Number)(b))
 
 // /* the following operations need the math library */
 // #if defined(lobject_c) || defined(lvm_c)
