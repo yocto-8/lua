@@ -457,6 +457,7 @@ void *y8_lua_realloc(void *ud, void *ptr, size_t osize, size_t nsize, bool must_
 /* these are quite standard operations */
 #if defined(LUA_CORE)
 #define luai_numadd(L,a,b)	((lua_Number)(a)+(lua_Number)(b))
+#define luai_numaddsat(L,a,b)	((lua_Number)(a).saturating_add((lua_Number)(b)))
 #define luai_numsub(L,a,b)	((lua_Number)(a)-(lua_Number)(b))
 #define luai_nummul(L,a,b)	((lua_Number)(a)*(lua_Number)(b))
 #define luai_numdiv(L,a,b)	((lua_Number)(a)/(lua_Number)(b))

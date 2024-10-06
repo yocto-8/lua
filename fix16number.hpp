@@ -3,6 +3,7 @@
 #include <bit>
 #include <compare>
 #include <cstdio>
+#include <limits>
 #include <type_traits>
 
 #define LUAFIX16_FN_ATTR [[gnu::always_inline, gnu::flatten]]
@@ -54,6 +55,18 @@ struct LuaFix16 {
 	LUAFIX16_FN_ATTR LuaFix16 & operator/=(const LuaFix16 &rhs)  { value = fix16_div(value, rhs.value); return *this; }
 
 	LUAFIX16_FN_ATTR const LuaFix16 operator+(const LuaFix16 &other) const  { LuaFix16 ret = *this; ret += other; return ret; }
+	LUAFIX16_FN_ATTR const LuaFix16 saturating_add(const LuaFix16 &other) const {
+		LuaFix16 ret = *this;
+		int64_t wide_sum = int64_t(value) + int64_t(other.value);
+
+		using SignedLimits = std::numeric_limits<int32_t>;
+
+		ret.value = int32_t(wide_sum > SignedLimits::max() ? SignedLimits::max()
+		                  : wide_sum < SignedLimits::min() ? SignedLimits::min()
+		                  : wide_sum);
+
+		return ret;
+	}
 	LUAFIX16_FN_ATTR const LuaFix16 operator-() const { return LuaFix16(0) - *this; }
 	LUAFIX16_FN_ATTR const LuaFix16 operator-(const LuaFix16 &other) const  { LuaFix16 ret = *this; ret -= other; return ret; }
 	LUAFIX16_FN_ATTR const LuaFix16 operator*(const LuaFix16 &other) const  { LuaFix16 ret = *this; ret *= other; return ret; }
