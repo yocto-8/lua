@@ -12,6 +12,12 @@
 #include "lstate.h"
 #include "lzio.h"
 
+/// Exception type that passes through Lua.
+/// Usually a fatal exception to the VM; which will be closed after.
+struct EmulatorPassthroughException {};
+
+/// Exception that signals a reset request.
+struct EmulatorResetRequest : EmulatorPassthroughException {};
 
 #define luaD_checkstack(L,n)	if (L->stack_last - L->top <= (n)) \
 				    luaD_growstack(L, n); else condmovestack(L);
