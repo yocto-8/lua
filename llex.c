@@ -384,6 +384,8 @@ static int read_unicode (LexState *ls, int del, SemInfo *seminfo) {
   //         if not isinstance(rest, int): iprint("  break;")
   //     iprint("}")
 
+  // fixme: this is massive code bloat and i feel terrible
+
 switch(ls->current) {
 case 0xe2:
   next(ls);
