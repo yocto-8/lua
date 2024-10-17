@@ -602,7 +602,7 @@ LUA_FAST LUAI_FUNC int luaO_int2fb (unsigned int x);
 LUA_FAST LUAI_FUNC int luaO_fb2int (int x);
 LUA_FAST LUAI_FUNC int luaO_ceillog2 (unsigned int x);
 LUA_FAST LUAI_FUNC lua_Number luaO_arith (int op, lua_Number v1, lua_Number v2);
-LUA_FAST LUAI_FUNC int luaO_str2d (const char *s, size_t len, lua_Number *result, int mask);
+LUAI_FUNC int luaO_str2d (const char *s, size_t len, lua_Number *result, int mask);
 LUA_FAST LUAI_FUNC int luaO_hexavalue (int c);
 LUA_FAST LUAI_FUNC const char *luaO_pushvfstring (lua_State *L, const char *fmt,
                                                        va_list argp);

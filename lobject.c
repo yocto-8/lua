@@ -209,6 +209,7 @@ static lua_Number lua_strb2number (const char *s, char **endptr, int parse_mask)
   return lua_Number::from_fix16(int(r));
 }
 
+[[gnu::cold]]
 int luaO_str2d (const char *s, size_t len, lua_Number *result, int mask) {
   char *endptr;
   if (strpbrk(s, "xX") || (mask & LPARSE_HEX) != 0)  /* hexa? */
