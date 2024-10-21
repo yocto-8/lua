@@ -1779,6 +1779,7 @@ static void mainfunc (LexState *ls, FuncState *fs) {
 Closure *luaY_parser (lua_State *L, ZIO *z, Mbuffer *buff,
                       Dyndata *dyd, const char *name, int firstchar) {
   LexState lexstate;
+  G(L)->y8_active_lexer = &lexstate;
   FuncState funcstate;
   Closure *cl = luaF_newLclosure(L, 1);  /* create main closure */
   /* anchor closure (to avoid being collected) */
@@ -1794,6 +1795,7 @@ Closure *luaY_parser (lua_State *L, ZIO *z, Mbuffer *buff,
   lua_assert(!funcstate.prev && funcstate.nups == 1 && !lexstate.fs);
   /* all scopes should be correctly finished */
   lua_assert(dyd->actvar.n == 0 && dyd->gt.n == 0 && dyd->label.n == 0);
+  G(L)->y8_active_lexer = nullptr;
   return cl;  /* it's on the stack too */
 }
 

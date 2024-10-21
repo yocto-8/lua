@@ -105,6 +105,7 @@ typedef struct CallInfo {
 
 #define isLua(ci)	((ci)->callstatus & CIST_LUA)
 
+struct LexState;
 
 /*
 ** `global state', shared by all threads of this state
@@ -146,6 +147,7 @@ typedef struct global_State {
   TString *tmname[TM_N];  /* array with tag-method names */
   struct Table *mt[LUA_NUMTAGS];  /* metatables for basic types */
   uint8_t *y8_mem;  /* yocto-8 memory, a flat 64KiB buffer */
+  LexState *y8_active_lexer;  /* HACK: yocto-8: used to  */
 } global_State;
 
 
