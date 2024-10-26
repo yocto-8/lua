@@ -166,7 +166,6 @@ static void inclinenumber (LexState *ls) {
 
 void luaX_setinput (lua_State *L, LexState *ls, ZIO *z, TString *source,
                     int firstchar) {
-  ls->decpoint = '.';
   ls->L = L;
   ls->current = firstchar;
   ls->lookahead.token = TK_EOS;  /* no look-ahead token */
@@ -212,27 +211,7 @@ static void buffreplace (LexState *ls, char from, char to) {
 }
 
 
-#if !defined(getlocaledecpoint)
-#define getlocaledecpoint()	(localeconv()->decimal_point[0])
-#endif
-
-
 #define buff2d(b,e)	luaO_str2d(luaZ_buffer(b), luaZ_bufflen(b) - 1, e, 0)
-
-/*
-** in case of format error, try to change decimal point separator to
-** the one defined in the current locale and check again
-*/
-static void trydecpoint (LexState *ls, SemInfo *seminfo) {
-  char old = ls->decpoint;
-  ls->decpoint = '.'; // getlocaledecpoint();
-  buffreplace(ls, old, ls->decpoint);  /* try new decimal separator */
-  if (!buff2d(ls->buff, &seminfo->r)) {
-    /* format error with correct decimal point: no more options */
-    buffreplace(ls, ls->decpoint, '.');  /* undo change (for error message) */
-    lexerror(ls, "malformed number", TK_NUMBER);
-  }
-}
 
 
 /* LUA_NUMBER */
@@ -241,23 +220,30 @@ static void trydecpoint (LexState *ls, SemInfo *seminfo) {
 ** will reject ill-formed numerals.
 */
 static void read_numeral (LexState *ls, SemInfo *seminfo) {
-  const char *expo = "Ee";
   int first = ls->current;
   lua_assert(lisdigit(ls->current));
   save_and_next(ls);
-  if (first == '0' && check_next(ls, "Xx"))  /* hexadecimal? */
-    expo = "Pp";
+  bool allow_hex = false, allow_dec = true;
+  if (first == '0') {
+    if (check_next(ls, "Xx")) {
+      allow_hex = true;
+    } else if (check_next(ls, "Bb")) {
+      allow_dec = false;
+    }
+  }
   for (;;) {
-    if (check_next(ls, expo))  /* exponent part? */
-      check_next(ls, "+-");  /* optional exponent sign */
-    if (lisxdigit(ls->current) || ls->current == '.')
+    if ((allow_hex && ((ls->current >= 'a' && ls->current <= 'z') || (ls->current >= 'A' && ls->current <= 'Z')))
+      || (allow_dec && lisdigit(ls->current))
+      || ls->current == '0' || ls->current == '1'
+      || ls->current == '.') {
       save_and_next(ls);
-    else  break;
+    }
+    else break;
   }
   save(ls, '\0');
-  buffreplace(ls, '.', ls->decpoint);  /* follow locale for decimal point */
-  if (!buff2d(ls->buff, &seminfo->r))  /* format error? */
-    trydecpoint(ls, seminfo); /* try to update decimal point separator */
+  if (!buff2d(ls->buff, &seminfo->r)) { /* format error? */
+    lexerror(ls, "malformed number", TK_NUMBER);
+  }
 }
 
 
