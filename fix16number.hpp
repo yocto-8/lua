@@ -23,8 +23,11 @@ struct LuaFix16 {
 		value = (uint16_t(integer_part) << 16) | decimal_part;
 	}
 	
-	template <typename Integer, std::enable_if_t<std::is_integral<Integer>::value, bool> = true>
+	template <typename Integer> requires std::signed_integral<Integer>
 	LUAFIX16_FN_ATTR LuaFix16(const Integer inValue) { value = fix16_from_int(inValue);   }
+	
+	template <typename UInteger> requires std::unsigned_integral<UInteger>
+	LUAFIX16_FN_ATTR LuaFix16(const UInteger inValue) { value = fix16_from_int((int16_t)(uint16_t)inValue);   }
 
 	LUAFIX16_FN_ATTR static LuaFix16 from_fix16(const fix16_t in) {
 		LuaFix16 v;
@@ -36,8 +39,11 @@ struct LuaFix16 {
 	LUAFIX16_FN_ATTR explicit operator double()  const { return fix16_to_dbl(value);   }
 	LUAFIX16_FN_ATTR explicit operator float()   const { return fix16_to_float(value); }
 	
-	template <typename Integer, std::enable_if_t<std::is_integral<Integer>::value, bool> = true>
-	LUAFIX16_FN_ATTR explicit operator Integer() const { return (Integer)fix16_to_int(value);   }
+	template <typename Integer> requires std::signed_integral<Integer>
+	LUAFIX16_FN_ATTR explicit operator Integer() const { return (Integer)fix16_to_int(value); }
+	
+	template <typename UInteger> requires std::unsigned_integral<UInteger>
+	LUAFIX16_FN_ATTR explicit operator UInteger() const { return (UInteger)(uint16_t)fix16_to_int(value); }
 
 	LUAFIX16_FN_ATTR LuaFix16 & operator=(const LuaFix16 &rhs) = default;
 	LUAFIX16_FN_ATTR LuaFix16 & operator=(LuaFix16 &&rhs) = default;
