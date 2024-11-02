@@ -16,20 +16,20 @@ struct LuaFix16 {
 	LUAFIX16_FN_ATTR constexpr LuaFix16(const LuaFix16 &inValue) = default;
 	LUAFIX16_FN_ATTR constexpr LuaFix16(LuaFix16 &&inValue) = default;
 	//LuaFix16(const fix16_t inValue) { value = inValue;                   }
-	LUAFIX16_FN_ATTR LuaFix16(const float inValue)   { value = fix16_from_float(inValue); }
-	LUAFIX16_FN_ATTR LuaFix16(const double inValue)  { value = fix16_from_dbl(inValue);   }
-	LUAFIX16_FN_ATTR LuaFix16(const int inValue)     { value = fix16_from_int(inValue);   }
-	LUAFIX16_FN_ATTR LuaFix16(const int16_t integer_part, uint16_t decimal_part) {
+	LUAFIX16_FN_ATTR constexpr LuaFix16(const float inValue)   { value = fix16_from_float(inValue); }
+	LUAFIX16_FN_ATTR constexpr LuaFix16(const double inValue)  { value = fix16_from_dbl(inValue);   }
+	LUAFIX16_FN_ATTR constexpr LuaFix16(const int inValue)     { value = fix16_from_int(inValue);   }
+	LUAFIX16_FN_ATTR constexpr LuaFix16(const int16_t integer_part, uint16_t decimal_part) {
 		value = (uint16_t(integer_part) << 16) | decimal_part;
 	}
 	
 	template <typename Integer> requires std::signed_integral<Integer>
-	LUAFIX16_FN_ATTR LuaFix16(const Integer inValue) { value = fix16_from_int(inValue);   }
+	LUAFIX16_FN_ATTR constexpr LuaFix16(const Integer inValue) { value = fix16_from_int(inValue);   }
 	
 	template <typename UInteger> requires std::unsigned_integral<UInteger>
-	LUAFIX16_FN_ATTR LuaFix16(const UInteger inValue) { value = fix16_from_int((int16_t)(uint16_t)inValue);   }
+	LUAFIX16_FN_ATTR constexpr LuaFix16(const UInteger inValue) { value = fix16_from_int((int16_t)(uint16_t)inValue);   }
 
-	LUAFIX16_FN_ATTR static LuaFix16 from_fix16(const fix16_t in) {
+	LUAFIX16_FN_ATTR constexpr static LuaFix16 from_fix16(const fix16_t in) {
 		LuaFix16 v;
 		v.value = in;
 		return v;
