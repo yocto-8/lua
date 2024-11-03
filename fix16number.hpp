@@ -155,3 +155,7 @@ inline LuaFix16 pow(LuaFix16 x, LuaFix16 y) {
 	return ret;
 }
 inline LuaFix16 ldexp(LuaFix16 x, int exp) { return x * pow(LuaFix16(2), exp); }
+
+constexpr LuaFix16 operator ""_raw_fix16(unsigned long long x) {
+	return LuaFix16::from_fix16(fix16_t(uint32_t(x)));
+}
