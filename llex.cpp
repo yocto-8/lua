@@ -335,7 +335,12 @@ static int readdecesc (LexState *ls) {
   return r;
 }
 
-static int read_unicode (LexState *ls, int del, SemInfo *seminfo) {
+[[gnu::noinline]]
+static void next_fn(LexState* ls) {
+  next(ls);
+}
+
+static int read_unicode (LexState *ls) {
   // convert utf-8 sequences into p8scii
   // uses list from https://web.archive.org/web/20240217141002/https://gist.github.com/joelsgp/bf930961230731fe370e5c25ba05c5d3
 
@@ -373,117 +378,117 @@ static int read_unicode (LexState *ls, int del, SemInfo *seminfo) {
 
 switch(ls->current) {
 case 0xe2:
-  next(ls);
+  next_fn(ls);
   switch(ls->current) {
   case 0x96:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0xae:
-      next(ls);
+      next_fn(ls);
       return 16;
     case 0xa0:
-      next(ls);
+      next_fn(ls);
       return 17;
     case 0xa1:
-      next(ls);
+      next_fn(ls);
       return 18;
     case 0xb6:
-      next(ls);
+      next_fn(ls);
       return 23;
     case 0x88:
-      next(ls);
+      next_fn(ls);
       return 128;
     case 0x92:
-      next(ls);
+      next_fn(ls);
       return 129;
     case 0x91:
-      next(ls);
+      next_fn(ls);
       return 132;
     case 0xa4:
-      next(ls);
+      next_fn(ls);
       return 152;
     case 0xa5:
-      next(ls);
+      next_fn(ls);
       return 153;
     }
     break;
   case 0x81:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0x99:
-      next(ls);
+      next_fn(ls);
       return 19;
     case 0x98:
-      next(ls);
+      next_fn(ls);
       return 20;
     case 0xb4:
-      next(ls);
+      next_fn(ls);
       return 4;
     case 0xb5:
-      next(ls);
+      next_fn(ls);
       return 5;
     case 0xb6:
-      next(ls);
+      next_fn(ls);
       return 6;
     case 0xb7:
-      next(ls);
+      next_fn(ls);
       return 7;
     case 0xb8:
-      next(ls);
+      next_fn(ls);
       return 8;
     }
     break;
   case 0x80:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0x96:
-      next(ls);
+      next_fn(ls);
       return 21;
     case 0xa2:
-      next(ls);
+      next_fn(ls);
       return 27;
     case 0xa6:
-      next(ls);
+      next_fn(ls);
       return 144;
     }
     break;
   case 0x97:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0x80:
-      next(ls);
+      next_fn(ls);
       return 22;
     case 0x8b:
-      next(ls);
+      next_fn(ls);
       return 127;
     case 0x8f:
-      next(ls);
+      next_fn(ls);
       return 134;
     case 0x86:
-      next(ls);
+      next_fn(ls);
       return 143;
     case 0x9c:
-      next(ls);
+      next_fn(ls);
       return 254;
     case 0x9d:
-      next(ls);
+      next_fn(ls);
       return 255;
     }
     break;
   case 0xac:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0x87:
-      next(ls);
+      next_fn(ls);
       switch(ls->current) {
       case 0xef:
-        next(ls);
+        next_fn(ls);
         switch(ls->current) {
         case 0xb8:
-          next(ls);
+          next_fn(ls);
           switch(ls->current) {
           case 0x8f:
-            next(ls);
+            next_fn(ls);
             return 131;
           }
           break;
@@ -492,16 +497,16 @@ case 0xe2:
       }
       break;
     case 0x85:
-      next(ls);
+      next_fn(ls);
       switch(ls->current) {
       case 0xef:
-        next(ls);
+        next_fn(ls);
         switch(ls->current) {
         case 0xb8:
-          next(ls);
+          next_fn(ls);
           switch(ls->current) {
           case 0x8f:
-            next(ls);
+            next_fn(ls);
             return 139;
           }
           break;
@@ -510,16 +515,16 @@ case 0xe2:
       }
       break;
     case 0x86:
-      next(ls);
+      next_fn(ls);
       switch(ls->current) {
       case 0xef:
-        next(ls);
+        next_fn(ls);
         switch(ls->current) {
         case 0xb8:
-          next(ls);
+          next_fn(ls);
           switch(ls->current) {
           case 0x8f:
-            next(ls);
+            next_fn(ls);
             return 148;
           }
           break;
@@ -530,57 +535,57 @@ case 0xe2:
     }
     break;
   case 0x9c:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0xbd:
-      next(ls);
+      next_fn(ls);
       return 133;
     }
     break;
   case 0x99:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0xa5:
-      next(ls);
+      next_fn(ls);
       return 135;
     case 0xaa:
-      next(ls);
+      next_fn(ls);
       return 141;
     }
     break;
   case 0x98:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0x89:
-      next(ls);
+      next_fn(ls);
       return 136;
     case 0x85:
-      next(ls);
+      next_fn(ls);
       return 146;
     }
     break;
   case 0x8c:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0x82:
-      next(ls);
+      next_fn(ls);
       return 138;
     }
     break;
   case 0x9e:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0xa1:
-      next(ls);
+      next_fn(ls);
       switch(ls->current) {
       case 0xef:
-        next(ls);
+        next_fn(ls);
         switch(ls->current) {
         case 0xb8:
-          next(ls);
+          next_fn(ls);
           switch(ls->current) {
           case 0x8f:
-            next(ls);
+            next_fn(ls);
             return 145;
           }
           break;
@@ -591,427 +596,427 @@ case 0xe2:
     }
     break;
   case 0xa7:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0x97:
-      next(ls);
+      next_fn(ls);
       return 147;
     }
     break;
   case 0x88:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0xa7:
-      next(ls);
+      next_fn(ls);
       return 150;
     }
     break;
   case 0x9d:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0x8e:
-      next(ls);
+      next_fn(ls);
       return 151;
     }
     break;
   }
   break;
 case 0xe3:
-  next(ls);
+  next_fn(ls);
   switch(ls->current) {
   case 0x80:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0x8c:
-      next(ls);
+      next_fn(ls);
       return 24;
     case 0x8d:
-      next(ls);
+      next_fn(ls);
       return 25;
     case 0x81:
-      next(ls);
+      next_fn(ls);
       return 28;
     case 0x82:
-      next(ls);
+      next_fn(ls);
       return 29;
     }
     break;
   case 0x82:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0x9b:
-      next(ls);
+      next_fn(ls);
       return 30;
     case 0x9c:
-      next(ls);
+      next_fn(ls);
       return 31;
     case 0x80:
-      next(ls);
+      next_fn(ls);
       return 186;
     case 0x81:
-      next(ls);
+      next_fn(ls);
       return 187;
     case 0x82:
-      next(ls);
+      next_fn(ls);
       return 188;
     case 0x84:
-      next(ls);
+      next_fn(ls);
       return 189;
     case 0x86:
-      next(ls);
+      next_fn(ls);
       return 190;
     case 0x88:
-      next(ls);
+      next_fn(ls);
       return 191;
     case 0x89:
-      next(ls);
+      next_fn(ls);
       return 192;
     case 0x8a:
-      next(ls);
+      next_fn(ls);
       return 193;
     case 0x8b:
-      next(ls);
+      next_fn(ls);
       return 194;
     case 0x8c:
-      next(ls);
+      next_fn(ls);
       return 195;
     case 0x8d:
-      next(ls);
+      next_fn(ls);
       return 196;
     case 0x8f:
-      next(ls);
+      next_fn(ls);
       return 197;
     case 0x92:
-      next(ls);
+      next_fn(ls);
       return 198;
     case 0x93:
-      next(ls);
+      next_fn(ls);
       return 199;
     case 0x83:
-      next(ls);
+      next_fn(ls);
       return 201;
     case 0x85:
-      next(ls);
+      next_fn(ls);
       return 202;
     case 0x87:
-      next(ls);
+      next_fn(ls);
       return 203;
     case 0xa2:
-      next(ls);
+      next_fn(ls);
       return 204;
     case 0xa4:
-      next(ls);
+      next_fn(ls);
       return 205;
     case 0xa6:
-      next(ls);
+      next_fn(ls);
       return 206;
     case 0xa8:
-      next(ls);
+      next_fn(ls);
       return 207;
     case 0xaa:
-      next(ls);
+      next_fn(ls);
       return 208;
     case 0xab:
-      next(ls);
+      next_fn(ls);
       return 209;
     case 0xad:
-      next(ls);
+      next_fn(ls);
       return 210;
     case 0xaf:
-      next(ls);
+      next_fn(ls);
       return 211;
     case 0xb1:
-      next(ls);
+      next_fn(ls);
       return 212;
     case 0xb3:
-      next(ls);
+      next_fn(ls);
       return 213;
     case 0xb5:
-      next(ls);
+      next_fn(ls);
       return 214;
     case 0xb7:
-      next(ls);
+      next_fn(ls);
       return 215;
     case 0xb9:
-      next(ls);
+      next_fn(ls);
       return 216;
     case 0xbb:
-      next(ls);
+      next_fn(ls);
       return 217;
     case 0xbd:
-      next(ls);
+      next_fn(ls);
       return 218;
     case 0xbf:
-      next(ls);
+      next_fn(ls);
       return 219;
     }
     break;
   case 0x81:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0x82:
-      next(ls);
+      next_fn(ls);
       return 154;
     case 0x84:
-      next(ls);
+      next_fn(ls);
       return 155;
     case 0x86:
-      next(ls);
+      next_fn(ls);
       return 156;
     case 0x88:
-      next(ls);
+      next_fn(ls);
       return 157;
     case 0x8a:
-      next(ls);
+      next_fn(ls);
       return 158;
     case 0x8b:
-      next(ls);
+      next_fn(ls);
       return 159;
     case 0x8d:
-      next(ls);
+      next_fn(ls);
       return 160;
     case 0x8f:
-      next(ls);
+      next_fn(ls);
       return 161;
     case 0x91:
-      next(ls);
+      next_fn(ls);
       return 162;
     case 0x93:
-      next(ls);
+      next_fn(ls);
       return 163;
     case 0x95:
-      next(ls);
+      next_fn(ls);
       return 164;
     case 0x97:
-      next(ls);
+      next_fn(ls);
       return 165;
     case 0x99:
-      next(ls);
+      next_fn(ls);
       return 166;
     case 0x9b:
-      next(ls);
+      next_fn(ls);
       return 167;
     case 0x9d:
-      next(ls);
+      next_fn(ls);
       return 168;
     case 0x9f:
-      next(ls);
+      next_fn(ls);
       return 169;
     case 0xa1:
-      next(ls);
+      next_fn(ls);
       return 170;
     case 0xa4:
-      next(ls);
+      next_fn(ls);
       return 171;
     case 0xa6:
-      next(ls);
+      next_fn(ls);
       return 172;
     case 0xa8:
-      next(ls);
+      next_fn(ls);
       return 173;
     case 0xaa:
-      next(ls);
+      next_fn(ls);
       return 174;
     case 0xab:
-      next(ls);
+      next_fn(ls);
       return 175;
     case 0xac:
-      next(ls);
+      next_fn(ls);
       return 176;
     case 0xad:
-      next(ls);
+      next_fn(ls);
       return 177;
     case 0xae:
-      next(ls);
+      next_fn(ls);
       return 178;
     case 0xaf:
-      next(ls);
+      next_fn(ls);
       return 179;
     case 0xb2:
-      next(ls);
+      next_fn(ls);
       return 180;
     case 0xb5:
-      next(ls);
+      next_fn(ls);
       return 181;
     case 0xb8:
-      next(ls);
+      next_fn(ls);
       return 182;
     case 0xbb:
-      next(ls);
+      next_fn(ls);
       return 183;
     case 0xbe:
-      next(ls);
+      next_fn(ls);
       return 184;
     case 0xbf:
-      next(ls);
+      next_fn(ls);
       return 185;
     case 0xa3:
-      next(ls);
+      next_fn(ls);
       return 200;
     }
     break;
   case 0x83:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0x81:
-      next(ls);
+      next_fn(ls);
       return 220;
     case 0x84:
-      next(ls);
+      next_fn(ls);
       return 221;
     case 0x86:
-      next(ls);
+      next_fn(ls);
       return 222;
     case 0x88:
-      next(ls);
+      next_fn(ls);
       return 223;
     case 0x8a:
-      next(ls);
+      next_fn(ls);
       return 224;
     case 0x8b:
-      next(ls);
+      next_fn(ls);
       return 225;
     case 0x8c:
-      next(ls);
+      next_fn(ls);
       return 226;
     case 0x8d:
-      next(ls);
+      next_fn(ls);
       return 227;
     case 0x8e:
-      next(ls);
+      next_fn(ls);
       return 228;
     case 0x8f:
-      next(ls);
+      next_fn(ls);
       return 229;
     case 0x92:
-      next(ls);
+      next_fn(ls);
       return 230;
     case 0x95:
-      next(ls);
+      next_fn(ls);
       return 231;
     case 0x98:
-      next(ls);
+      next_fn(ls);
       return 232;
     case 0x9b:
-      next(ls);
+      next_fn(ls);
       return 233;
     case 0x9e:
-      next(ls);
+      next_fn(ls);
       return 234;
     case 0x9f:
-      next(ls);
+      next_fn(ls);
       return 235;
     case 0xa0:
-      next(ls);
+      next_fn(ls);
       return 236;
     case 0xa1:
-      next(ls);
+      next_fn(ls);
       return 237;
     case 0xa2:
-      next(ls);
+      next_fn(ls);
       return 238;
     case 0xa4:
-      next(ls);
+      next_fn(ls);
       return 239;
     case 0xa6:
-      next(ls);
+      next_fn(ls);
       return 240;
     case 0xa8:
-      next(ls);
+      next_fn(ls);
       return 241;
     case 0xa9:
-      next(ls);
+      next_fn(ls);
       return 242;
     case 0xaa:
-      next(ls);
+      next_fn(ls);
       return 243;
     case 0xab:
-      next(ls);
+      next_fn(ls);
       return 244;
     case 0xac:
-      next(ls);
+      next_fn(ls);
       return 245;
     case 0xad:
-      next(ls);
+      next_fn(ls);
       return 246;
     case 0xaf:
-      next(ls);
+      next_fn(ls);
       return 247;
     case 0xb2:
-      next(ls);
+      next_fn(ls);
       return 248;
     case 0xb3:
-      next(ls);
+      next_fn(ls);
       return 249;
     case 0x83:
-      next(ls);
+      next_fn(ls);
       return 250;
     case 0xa3:
-      next(ls);
+      next_fn(ls);
       return 251;
     case 0xa5:
-      next(ls);
+      next_fn(ls);
       return 252;
     case 0xa7:
-      next(ls);
+      next_fn(ls);
       return 253;
     }
     break;
   }
   break;
 case 0xc2:
-  next(ls);
+  next_fn(ls);
   switch(ls->current) {
   case 0xa5:
-    next(ls);
+    next_fn(ls);
     return 26;
   case 0xb9:
-    next(ls);
+    next_fn(ls);
     return 1;
   case 0xb2:
-    next(ls);
+    next_fn(ls);
     return 2;
   case 0xb3:
-    next(ls);
+    next_fn(ls);
     return 3;
   }
   break;
 case 0xf0:
-  next(ls);
+  next_fn(ls);
   switch(ls->current) {
   case 0x9f:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0x90:
-      next(ls);
+      next_fn(ls);
       switch(ls->current) {
       case 0xb1:
-        next(ls);
+        next_fn(ls);
         return 130;
       }
       break;
     case 0x98:
-      next(ls);
+      next_fn(ls);
       switch(ls->current) {
       case 0x90:
-        next(ls);
+        next_fn(ls);
         return 140;
       }
       break;
     case 0x85:
-      next(ls);
+      next_fn(ls);
       switch(ls->current) {
       case 0xbe:
-        next(ls);
+        next_fn(ls);
         switch(ls->current) {
         case 0xef:
-          next(ls);
+          next_fn(ls);
           switch(ls->current) {
           case 0xb8:
-            next(ls);
+            next_fn(ls);
             switch(ls->current) {
             case 0x8f:
-              next(ls);
+              next_fn(ls);
               return 142;
             }
             break;
@@ -1026,48 +1031,48 @@ case 0xf0:
   }
   break;
 case 0xec:
-  next(ls);
+  next_fn(ls);
   switch(ls->current) {
   case 0x9b:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0x83:
-      next(ls);
+      next_fn(ls);
       return 137;
     }
     break;
   }
   break;
 case 0xcb:
-  next(ls);
+  next_fn(ls);
   switch(ls->current) {
   case 0x87:
-    next(ls);
+    next_fn(ls);
     return 149;
   }
   break;
 case 0xe1:
-  next(ls);
+  next_fn(ls);
   switch(ls->current) {
   case 0xb5:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0x87:
-      next(ls);
+      next_fn(ls);
       return 11;
     case 0x89:
-      next(ls);
+      next_fn(ls);
       return 14;
     }
     break;
   case 0xb6:
-    next(ls);
+    next_fn(ls);
     switch(ls->current) {
     case 0x9c:
-      next(ls);
+      next_fn(ls);
       return 12;
     case 0xa0:
-      next(ls);
+      next_fn(ls);
       return 15;
     }
     break;
@@ -1135,7 +1140,7 @@ static void read_string (LexState *ls, int del, SemInfo *seminfo) {
        no_save: break;
       }
       default: {
-        const int p8scii_eq = read_unicode(ls, del, seminfo);
+        const int p8scii_eq = read_unicode(ls);
         if (p8scii_eq == -2) {
           escerror(ls, &ls->current, 1, "unknown utf-8 sequence");
         } else if (p8scii_eq != -1) {
