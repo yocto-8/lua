@@ -424,7 +424,7 @@ void *y8_lua_realloc(void *ud, void *ptr, size_t osize, size_t nsize, bool must_
 #define LUA_NUMBER_FMT		"%d" // used in liolib, which will be broken, but we dn't use it so lol
 //#define lua_number2str(s,n)	sprintf((s), LUA_NUMBER_FMT, (n).value >> 16, (n).value & 0xFFFF)
 #define lua_number2str(s,n)	fix16_to_str((n).value, s, 4)
-#define LUAI_MAXNUMBER2STR	13
+#define LUAI_MAXNUMBER2STR	64
 
 
 /*
