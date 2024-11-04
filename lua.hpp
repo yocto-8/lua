@@ -128,7 +128,8 @@ extern const char lua_ident[];
 /*
 ** state manipulation
 */
-LUA_API lua_State *(lua_newstate) (lua_Alloc f, void *ud, uint8_t *y8_buf);
+struct LG;
+LUA_API lua_State *(lua_newstate) (lua_Alloc f, void *ud, LG *l, uint8_t *y8_buf);
 LUA_API void       (lua_close) (lua_State *L);
 LUA_API lua_State *(lua_newthread) (lua_State *L);
 

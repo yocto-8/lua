@@ -178,6 +178,24 @@ struct lua_State {
   CallInfo base_ci;  /* CallInfo for first level (C calling Lua) */
 };
 
+/*
+** thread state + extra space
+*/
+typedef struct LX {
+#if defined(LUAI_EXTRASPACE)
+  char buff[LUAI_EXTRASPACE];
+#endif
+  lua_State l;
+} LX;
+
+
+/*
+** Main thread combines a thread state and the global state
+*/
+typedef struct LG {
+  LX l;
+  global_State g;
+} LG;
 
 #define G(L)	(L->l_G)
 

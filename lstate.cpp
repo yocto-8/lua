@@ -53,28 +53,6 @@
 #endif
 
 
-
-/*
-** thread state + extra space
-*/
-typedef struct LX {
-#if defined(LUAI_EXTRASPACE)
-  char buff[LUAI_EXTRASPACE];
-#endif
-  lua_State l;
-} LX;
-
-
-/*
-** Main thread combines a thread state and the global state
-*/
-typedef struct LG {
-  LX l;
-  global_State g;
-} LG;
-
-
-
 #define fromstate(L)	(cast(LX *, cast(lu_byte *, (L)) - offsetof(LX, l)))
 
 
@@ -231,7 +209,6 @@ static void close_state (lua_State *L) {
   luaZ_freebuffer(L, &g->buff);
   freestack(L);
   lua_assert(gettotalbytes(g) == sizeof(LG));
-  y8_lua_realloc(g->ud, fromstate(L), sizeof(LG), 0);  /* free main block */
 }
 
 
@@ -264,11 +241,10 @@ void luaE_freethread (lua_State *L, lua_State *L1) {
 }
 
 
-LUA_API lua_State *lua_newstate (lua_Alloc f, void *ud, uint8_t *y8_mem) {
+LUA_API lua_State *lua_newstate (lua_Alloc f, void *ud, LG *l, uint8_t *y8_mem) {
   int i;
   lua_State *L;
   global_State *g;
-  LG *l = cast(LG *, (*f)(ud, NULL, LUA_TTHREAD, sizeof(LG), true));
   if (l == NULL) return NULL;
   L = &l->l.l;
   g = &l->g;
