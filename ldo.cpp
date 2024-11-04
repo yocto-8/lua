@@ -109,7 +109,7 @@ LUA_FAST static void seterrorobj (lua_State *L, int errcode, StkId oldtop) {
 }
 
 
-LUA_FAST l_noret luaD_throw (lua_State *L, int errcode) {
+l_noret luaD_throw (lua_State *L, int errcode) {
 #ifdef Y8_YOLO_RELEASE
   __builtin_unreachable();
 #endif

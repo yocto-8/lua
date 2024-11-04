@@ -187,6 +187,10 @@ void *y8_lua_realloc(void *ud, void *ptr, size_t osize, size_t nsize, bool must_
 #if defined(__GNUC__) && ((__GNUC__*100 + __GNUC_MINOR__) >= 302) && \
     defined(__ELF__)		/* { */
 #define LUA_FAST	__attribute__((section(Y8_SRAM_SECTION), hot))
+// TM-related functions. don't care that much to make it a very hot path, prefer
+// to save SRAM over perf
+#define LUA_TM_RELATED	__attribute__((hot))
+#define LUA_COLD	__attribute__((cold))
 #define LUA_PURE	__attribute__((pure))
 // unavailable as of gcc 14, so untested at the time of writing
 // #define LUA_UNSEQUENCED __attribute__((unsequenced))
