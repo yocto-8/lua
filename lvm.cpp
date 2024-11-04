@@ -1048,5 +1048,3 @@ void luaV_execute (lua_State *L) {
       //lua_assert(0);
     )
 }
-
-#include "ltable.cpp"
