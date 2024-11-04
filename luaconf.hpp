@@ -188,6 +188,9 @@ void *y8_lua_realloc(void *ud, void *ptr, size_t osize, size_t nsize, bool must_
     defined(__ELF__)		/* { */
 #define LUA_FAST	__attribute__((section(Y8_SRAM_SECTION), hot))
 #define LUA_PURE	__attribute__((pure))
+// unavailable as of gcc 14, so untested at the time of writing
+// #define LUA_UNSEQUENCED __attribute__((unsequenced))
+#define LUA_UNSEQUENCED
 #define LUAI_FUNC	__attribute__((visibility("hidden"))) extern
 #define LUAI_DDEC	__attribute__((visibility("hidden"))) extern
 #define LUAI_DDEF	/* empty */
