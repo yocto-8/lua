@@ -22,11 +22,9 @@
 #include "ltable.hpp"
 #include "lzio.hpp"
 
-
-
-#define next(ls) (ls->current = zgetc(ls->z))
-
-
+inline int next(LexState* ls) {
+  return (ls->current = zgetc(ls->z));
+}
 
 #define currIsNewline(ls)	(ls->current == '\n' || ls->current == '\r')
 
