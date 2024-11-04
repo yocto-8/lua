@@ -884,14 +884,14 @@ struct CallS {  /* data to `f_call' */
 };
 
 
-static void f_call (lua_State *L, void *ud) {
+LUA_FAST static void f_call (lua_State *L, void *ud) {
   struct CallS *c = cast(struct CallS *, ud);
   luaD_call(L, c->func, c->nresults, 0);
 }
 
 
 
-LUA_API int lua_pcallk (lua_State *L, int nargs, int nresults, int errfunc,
+LUA_FAST LUA_API int lua_pcallk (lua_State *L, int nargs, int nresults, int errfunc,
                         int ctx, lua_CFunction k) {
   struct CallS c;
   int status;
