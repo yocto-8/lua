@@ -17,7 +17,8 @@
 struct EmulatorPassthroughException {};
 
 /// Exception that signals a reset request.
-struct EmulatorResetRequest : EmulatorPassthroughException {};
+struct EmulatorReset : EmulatorPassthroughException {};
+struct EmulatorPanic : EmulatorPassthroughException {};
 
 #define luaD_checkstack(L,n)	if (L->stack_last - L->top <= (n)) \
 				    luaD_growstack(L, n); else condmovestack(L);
