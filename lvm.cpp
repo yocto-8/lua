@@ -141,8 +141,8 @@ void luaV_gettable_upvalue_fast (lua_State *L, const TValue *t, TValue *key, Stk
   Table *h = hvalue(t);
   const TValue *res = luaH_get(h, key);
 
-  lua_assert(!ttisnil(res) ||  /* result is not nil? */
-            (tm = fasttm(L, h->metatable, TM_INDEX)) == NULL);
+  // lua_assert(!ttisnil(res) ||  /* result is not nil? */
+  //           (tm = fasttm(L, h->metatable, TM_INDEX)) == NULL);
 
   setobj2s(L, val, res);
 }

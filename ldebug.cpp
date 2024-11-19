@@ -43,6 +43,7 @@ static int currentpc (CallInfo *ci) {
 
 
 static int currentline (CallInfo *ci) {
+  lua_assert(currentpc(ci) != -1);
   return getfuncline(ci_func(ci)->p, currentpc(ci));
 }
 
