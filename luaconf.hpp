@@ -25,9 +25,7 @@
 // stock lua stores a pointer to the allocator inside the lua state; in yocto-8
 // we hardcode it to this to avoid an indirect call that can never be inlined
 // also allows us to make smarter use of multi-heap
-extern "C" {
 void *y8_lua_realloc(void *ud, void *ptr, size_t osize, size_t nsize, bool must_not_fail = false);
-}
 
 /*
 @@ LUA_ANSI controls the use of non-ansi features.
