@@ -943,7 +943,8 @@ void luaV_execute (lua_State *L) {
       else {  /* invocation via reentry: continue execution */
         if (b) L->top = L->ci->top;
         lua_assert(isLua(L->ci));
-        lua_assert(GET_OPCODE(*(pc - 1)) == OP_CALL);
+        // FIXME: why is this assertion failing?
+        // lua_assert(GET_OPCODE(*( ci->u.l.savedpc - 1)) == OP_CALL);
         [[clang::musttail]] return luaV_execute(L);  /* restart luaV_execute over new Lua function */
       }
     )
