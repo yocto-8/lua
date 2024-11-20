@@ -138,11 +138,15 @@ void luaV_gettable (lua_State *L, const TValue *t, TValue *key, StkId val) {
 }
 
 void luaV_gettable_upvalue_fast (lua_State *L, const TValue *t, TValue *key, StkId val) {
+  // if not a table, fallback to slow path
+  // this is most likely (always?) because the table is nil; so this slow path
+  // is most likely an error path
+  if (!ttistable(t)) [[unlikely]] { return luaV_gettable(L, t, key, val); }
+
   Table *h = hvalue(t);
   const TValue *res = luaH_get(h, key);
 
-  // lua_assert(!ttisnil(res) ||  /* result is not nil? */
-  //           (tm = fasttm(L, h->metatable, TM_INDEX)) == NULL);
+  lua_assert(!ttisnil(res) || fasttm(L, h->metatable, TM_INDEX) == nullptr);
 
   setobj2s(L, val, res);
 }
