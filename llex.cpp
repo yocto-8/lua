@@ -6,6 +6,7 @@
 
 
 // #include <locale.h>
+#include <algorithm>
 #include <string.h>
 
 #define llex_c
@@ -21,6 +22,7 @@
 #include "lstring.hpp"
 #include "ltable.hpp"
 #include "lzio.hpp"
+#include "lp8scii.hpp"
 
 inline int next(LexState* ls) {
   return (ls->current = zgetc(ls->z));
@@ -333,755 +335,64 @@ static int readdecesc (LexState *ls) {
   return r;
 }
 
-[[gnu::noinline]]
-static void next_fn(LexState* ls) {
-  next(ls);
+
+// parses UTF-8 input string to find a P8SCII code
+// on unrecognized characters, return -1
+inline int utf8_to_p8scii(LexState *ls) {
+  std::size_t depth = 0;
+
+  auto search_lower_bound = p8scii_lex_sort_utf8_offsets.begin();
+  auto search_upper_bound = p8scii_lex_sort_utf8_offsets.end();
+
+  // printf("== NEW SCAN\n");
+
+  for (;;) {
+    // after the two partition_point calls, the iterator range is the range
+    // of (offsets to) utf-8 strings that match for up to the `depth`-th
+    // character.
+
+    const std::uint8_t c = ls->current;
+
+    // printf("... depth=%d, char='%c'\n", depth, c);
+
+    search_lower_bound = std::partition_point(
+      search_lower_bound,
+      search_upper_bound,
+      [&](std::int16_t table_offset) -> bool {
+        // printf("lower bound test: %d vs %d\n", c, p8scii_table[table_offset + depth]);
+        return c > p8scii_table[table_offset + depth];
+      }
+    );
+
+    search_upper_bound = std::partition_point(
+      search_lower_bound,
+      search_upper_bound,
+      [&](std::int16_t table_offset) -> bool {
+        // printf("upper bound test: %d vs %d\n", c, p8scii_table[table_offset + depth]);
+        return c >= p8scii_table[table_offset + depth];
+      }
+    );
+
+    if (search_lower_bound == search_upper_bound) {
+      return -1;
+    }
+
+    // for (auto it = search_lower_bound; it < search_upper_bound; ++it) {
+    //   printf("still candidate: %d\n", p8scii_table[*it - 1]);
+    // }
+
+    next(ls);
+
+    // do we have a full match?
+    if (p8scii_table[*search_lower_bound + depth + 1] == '\0') {
+      // one byte before the utf-8 string is the p8scii value in this table
+      return p8scii_table[*search_lower_bound - 1];
+    }
+
+    ++depth;
+  }
 }
 
-static int read_unicode (LexState *ls) {
-  // convert utf-8 sequences into p8scii
-  // uses list from https://web.archive.org/web/20240217141002/https://gist.github.com/joelsgp/bf930961230731fe370e5c25ba05c5d3
-
-  // by_prefix = {}
-  // def update_prefixes(tbl):
-  //     for x, i in tbl.items():
-  //         if len(x) > 1:
-  //             r = by_prefix
-  //             last = r
-  //             for y in x:
-  //                 if y not in r:
-  //                     r[y] = {}
-  //                 last = r
-  //                 r = r[y]
-  //             last[y] = i
-
-  // update_prefixes({x: i for i, x in enumerate(pscii_tbl_enc) if i >= 16})
-  // update_prefixes({x.encode(): i for x, i in {"¹": 1, "²": 2, "³": 3, "⁴": 4, "⁵": 5, "⁶": 6, "⁷": 7, "⁸": 8, "ᵇ": 11, "ᶜ": 12, "ᵉ": 14, "ᶠ": 15}.items()})
-
-  // def print_u8_handlers(x, ind=0):
-  //     iprint = lambda x: print(f"{ind*2*' '}{x}")
-  //     if ind>0:
-  //         iprint(f"next(ls);")
-  //     if isinstance(x, int):
-  //         iprint(f"return {x};")
-  //         return
-  //     iprint("switch(ls->current) {")
-  //     for start_byte, rest in x.items():
-  //         iprint(f"case {start_byte}:")
-  //         print_u8_handlers(rest, ind+1)
-  //         if not isinstance(rest, int): iprint("  break;")
-  //     iprint("}")
-
-  // fixme: this is massive code bloat and i feel terrible
-
-switch(ls->current) {
-case 0xe2:
-  next_fn(ls);
-  switch(ls->current) {
-  case 0x96:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0xae:
-      next_fn(ls);
-      return 16;
-    case 0xa0:
-      next_fn(ls);
-      return 17;
-    case 0xa1:
-      next_fn(ls);
-      return 18;
-    case 0xb6:
-      next_fn(ls);
-      return 23;
-    case 0x88:
-      next_fn(ls);
-      return 128;
-    case 0x92:
-      next_fn(ls);
-      return 129;
-    case 0x91:
-      next_fn(ls);
-      return 132;
-    case 0xa4:
-      next_fn(ls);
-      return 152;
-    case 0xa5:
-      next_fn(ls);
-      return 153;
-    }
-    break;
-  case 0x81:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0x99:
-      next_fn(ls);
-      return 19;
-    case 0x98:
-      next_fn(ls);
-      return 20;
-    case 0xb4:
-      next_fn(ls);
-      return 4;
-    case 0xb5:
-      next_fn(ls);
-      return 5;
-    case 0xb6:
-      next_fn(ls);
-      return 6;
-    case 0xb7:
-      next_fn(ls);
-      return 7;
-    case 0xb8:
-      next_fn(ls);
-      return 8;
-    }
-    break;
-  case 0x80:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0x96:
-      next_fn(ls);
-      return 21;
-    case 0xa2:
-      next_fn(ls);
-      return 27;
-    case 0xa6:
-      next_fn(ls);
-      return 144;
-    }
-    break;
-  case 0x97:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0x80:
-      next_fn(ls);
-      return 22;
-    case 0x8b:
-      next_fn(ls);
-      return 127;
-    case 0x8f:
-      next_fn(ls);
-      return 134;
-    case 0x86:
-      next_fn(ls);
-      return 143;
-    case 0x9c:
-      next_fn(ls);
-      return 254;
-    case 0x9d:
-      next_fn(ls);
-      return 255;
-    }
-    break;
-  case 0xac:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0x87:
-      next_fn(ls);
-      switch(ls->current) {
-      case 0xef:
-        next_fn(ls);
-        switch(ls->current) {
-        case 0xb8:
-          next_fn(ls);
-          switch(ls->current) {
-          case 0x8f:
-            next_fn(ls);
-            return 131;
-          }
-          break;
-        }
-        break;
-      }
-      break;
-    case 0x85:
-      next_fn(ls);
-      switch(ls->current) {
-      case 0xef:
-        next_fn(ls);
-        switch(ls->current) {
-        case 0xb8:
-          next_fn(ls);
-          switch(ls->current) {
-          case 0x8f:
-            next_fn(ls);
-            return 139;
-          }
-          break;
-        }
-        break;
-      }
-      break;
-    case 0x86:
-      next_fn(ls);
-      switch(ls->current) {
-      case 0xef:
-        next_fn(ls);
-        switch(ls->current) {
-        case 0xb8:
-          next_fn(ls);
-          switch(ls->current) {
-          case 0x8f:
-            next_fn(ls);
-            return 148;
-          }
-          break;
-        }
-        break;
-      }
-      break;
-    }
-    break;
-  case 0x9c:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0xbd:
-      next_fn(ls);
-      return 133;
-    }
-    break;
-  case 0x99:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0xa5:
-      next_fn(ls);
-      return 135;
-    case 0xaa:
-      next_fn(ls);
-      return 141;
-    }
-    break;
-  case 0x98:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0x89:
-      next_fn(ls);
-      return 136;
-    case 0x85:
-      next_fn(ls);
-      return 146;
-    }
-    break;
-  case 0x8c:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0x82:
-      next_fn(ls);
-      return 138;
-    }
-    break;
-  case 0x9e:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0xa1:
-      next_fn(ls);
-      switch(ls->current) {
-      case 0xef:
-        next_fn(ls);
-        switch(ls->current) {
-        case 0xb8:
-          next_fn(ls);
-          switch(ls->current) {
-          case 0x8f:
-            next_fn(ls);
-            return 145;
-          }
-          break;
-        }
-        break;
-      }
-      break;
-    }
-    break;
-  case 0xa7:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0x97:
-      next_fn(ls);
-      return 147;
-    }
-    break;
-  case 0x88:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0xa7:
-      next_fn(ls);
-      return 150;
-    }
-    break;
-  case 0x9d:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0x8e:
-      next_fn(ls);
-      return 151;
-    }
-    break;
-  }
-  break;
-case 0xe3:
-  next_fn(ls);
-  switch(ls->current) {
-  case 0x80:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0x8c:
-      next_fn(ls);
-      return 24;
-    case 0x8d:
-      next_fn(ls);
-      return 25;
-    case 0x81:
-      next_fn(ls);
-      return 28;
-    case 0x82:
-      next_fn(ls);
-      return 29;
-    }
-    break;
-  case 0x82:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0x9b:
-      next_fn(ls);
-      return 30;
-    case 0x9c:
-      next_fn(ls);
-      return 31;
-    case 0x80:
-      next_fn(ls);
-      return 186;
-    case 0x81:
-      next_fn(ls);
-      return 187;
-    case 0x82:
-      next_fn(ls);
-      return 188;
-    case 0x84:
-      next_fn(ls);
-      return 189;
-    case 0x86:
-      next_fn(ls);
-      return 190;
-    case 0x88:
-      next_fn(ls);
-      return 191;
-    case 0x89:
-      next_fn(ls);
-      return 192;
-    case 0x8a:
-      next_fn(ls);
-      return 193;
-    case 0x8b:
-      next_fn(ls);
-      return 194;
-    case 0x8c:
-      next_fn(ls);
-      return 195;
-    case 0x8d:
-      next_fn(ls);
-      return 196;
-    case 0x8f:
-      next_fn(ls);
-      return 197;
-    case 0x92:
-      next_fn(ls);
-      return 198;
-    case 0x93:
-      next_fn(ls);
-      return 199;
-    case 0x83:
-      next_fn(ls);
-      return 201;
-    case 0x85:
-      next_fn(ls);
-      return 202;
-    case 0x87:
-      next_fn(ls);
-      return 203;
-    case 0xa2:
-      next_fn(ls);
-      return 204;
-    case 0xa4:
-      next_fn(ls);
-      return 205;
-    case 0xa6:
-      next_fn(ls);
-      return 206;
-    case 0xa8:
-      next_fn(ls);
-      return 207;
-    case 0xaa:
-      next_fn(ls);
-      return 208;
-    case 0xab:
-      next_fn(ls);
-      return 209;
-    case 0xad:
-      next_fn(ls);
-      return 210;
-    case 0xaf:
-      next_fn(ls);
-      return 211;
-    case 0xb1:
-      next_fn(ls);
-      return 212;
-    case 0xb3:
-      next_fn(ls);
-      return 213;
-    case 0xb5:
-      next_fn(ls);
-      return 214;
-    case 0xb7:
-      next_fn(ls);
-      return 215;
-    case 0xb9:
-      next_fn(ls);
-      return 216;
-    case 0xbb:
-      next_fn(ls);
-      return 217;
-    case 0xbd:
-      next_fn(ls);
-      return 218;
-    case 0xbf:
-      next_fn(ls);
-      return 219;
-    }
-    break;
-  case 0x81:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0x82:
-      next_fn(ls);
-      return 154;
-    case 0x84:
-      next_fn(ls);
-      return 155;
-    case 0x86:
-      next_fn(ls);
-      return 156;
-    case 0x88:
-      next_fn(ls);
-      return 157;
-    case 0x8a:
-      next_fn(ls);
-      return 158;
-    case 0x8b:
-      next_fn(ls);
-      return 159;
-    case 0x8d:
-      next_fn(ls);
-      return 160;
-    case 0x8f:
-      next_fn(ls);
-      return 161;
-    case 0x91:
-      next_fn(ls);
-      return 162;
-    case 0x93:
-      next_fn(ls);
-      return 163;
-    case 0x95:
-      next_fn(ls);
-      return 164;
-    case 0x97:
-      next_fn(ls);
-      return 165;
-    case 0x99:
-      next_fn(ls);
-      return 166;
-    case 0x9b:
-      next_fn(ls);
-      return 167;
-    case 0x9d:
-      next_fn(ls);
-      return 168;
-    case 0x9f:
-      next_fn(ls);
-      return 169;
-    case 0xa1:
-      next_fn(ls);
-      return 170;
-    case 0xa4:
-      next_fn(ls);
-      return 171;
-    case 0xa6:
-      next_fn(ls);
-      return 172;
-    case 0xa8:
-      next_fn(ls);
-      return 173;
-    case 0xaa:
-      next_fn(ls);
-      return 174;
-    case 0xab:
-      next_fn(ls);
-      return 175;
-    case 0xac:
-      next_fn(ls);
-      return 176;
-    case 0xad:
-      next_fn(ls);
-      return 177;
-    case 0xae:
-      next_fn(ls);
-      return 178;
-    case 0xaf:
-      next_fn(ls);
-      return 179;
-    case 0xb2:
-      next_fn(ls);
-      return 180;
-    case 0xb5:
-      next_fn(ls);
-      return 181;
-    case 0xb8:
-      next_fn(ls);
-      return 182;
-    case 0xbb:
-      next_fn(ls);
-      return 183;
-    case 0xbe:
-      next_fn(ls);
-      return 184;
-    case 0xbf:
-      next_fn(ls);
-      return 185;
-    case 0xa3:
-      next_fn(ls);
-      return 200;
-    }
-    break;
-  case 0x83:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0x81:
-      next_fn(ls);
-      return 220;
-    case 0x84:
-      next_fn(ls);
-      return 221;
-    case 0x86:
-      next_fn(ls);
-      return 222;
-    case 0x88:
-      next_fn(ls);
-      return 223;
-    case 0x8a:
-      next_fn(ls);
-      return 224;
-    case 0x8b:
-      next_fn(ls);
-      return 225;
-    case 0x8c:
-      next_fn(ls);
-      return 226;
-    case 0x8d:
-      next_fn(ls);
-      return 227;
-    case 0x8e:
-      next_fn(ls);
-      return 228;
-    case 0x8f:
-      next_fn(ls);
-      return 229;
-    case 0x92:
-      next_fn(ls);
-      return 230;
-    case 0x95:
-      next_fn(ls);
-      return 231;
-    case 0x98:
-      next_fn(ls);
-      return 232;
-    case 0x9b:
-      next_fn(ls);
-      return 233;
-    case 0x9e:
-      next_fn(ls);
-      return 234;
-    case 0x9f:
-      next_fn(ls);
-      return 235;
-    case 0xa0:
-      next_fn(ls);
-      return 236;
-    case 0xa1:
-      next_fn(ls);
-      return 237;
-    case 0xa2:
-      next_fn(ls);
-      return 238;
-    case 0xa4:
-      next_fn(ls);
-      return 239;
-    case 0xa6:
-      next_fn(ls);
-      return 240;
-    case 0xa8:
-      next_fn(ls);
-      return 241;
-    case 0xa9:
-      next_fn(ls);
-      return 242;
-    case 0xaa:
-      next_fn(ls);
-      return 243;
-    case 0xab:
-      next_fn(ls);
-      return 244;
-    case 0xac:
-      next_fn(ls);
-      return 245;
-    case 0xad:
-      next_fn(ls);
-      return 246;
-    case 0xaf:
-      next_fn(ls);
-      return 247;
-    case 0xb2:
-      next_fn(ls);
-      return 248;
-    case 0xb3:
-      next_fn(ls);
-      return 249;
-    case 0x83:
-      next_fn(ls);
-      return 250;
-    case 0xa3:
-      next_fn(ls);
-      return 251;
-    case 0xa5:
-      next_fn(ls);
-      return 252;
-    case 0xa7:
-      next_fn(ls);
-      return 253;
-    }
-    break;
-  }
-  break;
-case 0xc2:
-  next_fn(ls);
-  switch(ls->current) {
-  case 0xa5:
-    next_fn(ls);
-    return 26;
-  case 0xb9:
-    next_fn(ls);
-    return 1;
-  case 0xb2:
-    next_fn(ls);
-    return 2;
-  case 0xb3:
-    next_fn(ls);
-    return 3;
-  }
-  break;
-case 0xf0:
-  next_fn(ls);
-  switch(ls->current) {
-  case 0x9f:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0x90:
-      next_fn(ls);
-      switch(ls->current) {
-      case 0xb1:
-        next_fn(ls);
-        return 130;
-      }
-      break;
-    case 0x98:
-      next_fn(ls);
-      switch(ls->current) {
-      case 0x90:
-        next_fn(ls);
-        return 140;
-      }
-      break;
-    case 0x85:
-      next_fn(ls);
-      switch(ls->current) {
-      case 0xbe:
-        next_fn(ls);
-        switch(ls->current) {
-        case 0xef:
-          next_fn(ls);
-          switch(ls->current) {
-          case 0xb8:
-            next_fn(ls);
-            switch(ls->current) {
-            case 0x8f:
-              next_fn(ls);
-              return 142;
-            }
-            break;
-          }
-          break;
-        }
-        break;
-      }
-      break;
-    }
-    break;
-  }
-  break;
-case 0xec:
-  next_fn(ls);
-  switch(ls->current) {
-  case 0x9b:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0x83:
-      next_fn(ls);
-      return 137;
-    }
-    break;
-  }
-  break;
-case 0xcb:
-  next_fn(ls);
-  switch(ls->current) {
-  case 0x87:
-    next_fn(ls);
-    return 149;
-  }
-  break;
-case 0xe1:
-  next_fn(ls);
-  switch(ls->current) {
-  case 0xb5:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0x87:
-      next_fn(ls);
-      return 11;
-    case 0x89:
-      next_fn(ls);
-      return 14;
-    }
-    break;
-  case 0xb6:
-    next_fn(ls);
-    switch(ls->current) {
-    case 0x9c:
-      next_fn(ls);
-      return 12;
-    case 0xa0:
-      next_fn(ls);
-      return 15;
-    }
-    break;
-  }
-  break;
-  default: return -1;
-}
-
-
-  return -2;
-}
 
 static void read_string (LexState *ls, int del, SemInfo *seminfo) {
   save_and_next(ls);  /* keep delimiter (for error messages) */
@@ -1138,13 +449,11 @@ static void read_string (LexState *ls, int del, SemInfo *seminfo) {
        no_save: break;
       }
       default: {
-        const int p8scii_eq = read_unicode(ls);
-        if (p8scii_eq == -2) {
+        const int p8scii_eq = utf8_to_p8scii(ls);
+        if (p8scii_eq == -1) {
           escerror(ls, &ls->current, 1, "unknown utf-8 sequence");
-        } else if (p8scii_eq != -1) {
-          save(ls, p8scii_eq);
         } else {
-          save_and_next(ls);
+          save(ls, p8scii_eq);
         }
       }
     }
